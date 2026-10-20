@@ -34,6 +34,7 @@ code{font-family:'Courier New',monospace;background:#eaf5fb;color:var(--deep);pa
 .btn{font-weight:800;border:2px solid var(--ink);border-radius:20px;background:var(--pink);color:#fff;padding:9px 20px;cursor:pointer;box-shadow:2px 2px 0 var(--ink);font-size:15px}
 canvas{display:block;width:100%;height:150px;background:#fff;border:2px solid var(--ink);border-radius:10px;margin-top:10px}
 @media(max-width:560px){.ctl{grid-template-columns:1fr 74px}.ctl label{grid-column:1/-1}}
+.avb{border:2.5px solid var(--pink);background:#fff7fb;border-radius:12px;padding:10px 14px;margin:14px 0;min-width:0}.avb .box{font-family:'Courier New',monospace;font-size:13px}.avb select{padding:4px;border:2px solid var(--ink);border-radius:8px;width:100%}.avb .ctl>*{min-width:0}canvas{max-width:100%}mjx-container[display=true]{max-width:100%;overflow-x:auto;overflow-y:hidden}code{overflow-wrap:anywhere}.card{min-width:0}
 </style>
 </head>
 <body>
@@ -90,7 +91,7 @@ canvas{display:block;width:100%;height:150px;background:#fff;border:2px solid va
 <ul>
 <li><b>Lineáris interpoláció</b> – egyszerű, de saját aluláteresztő hatása van.</li>
 <li><b>Allpass interpoláció</b> – az amplitúdót nem változtatja: \( H_{ap}(z)=\dfrac{C+z^{-1}}{1+C z^{-1}},\; C=\dfrac{1-d}{1+d} \). Hangolt hangszereknél ez az előnyös; \(d\in[0{,}5;\,1{,}5]\) esetén jó (ekkor \(|C|\le\tfrac13\)), ezért a késleltetést úgy bontjuk egész és törtrészre, hogy a törtrész ebbe a sávba essen. Hátránya, hogy fázisa frekvenciafüggő, és a késleltetés gyors változtatásakor átmeneti zajok (kattanás) keletkezhetnek.</li>
-<li><b>Köbös (Lagrange) interpoláció</b> – ezt használja a gen~ és a SuperCollider kód: simább amplitúdómenetet ad, mint a lineáris, de nem allpass.</li>
+<li><b>Köbös (Lagrange) interpoláció</b> – ezt használja a gen~ kód: simább amplitúdómenetet ad, mint a lineáris, de nem allpass.</li>
 </ul>
 
 <h3>4. Lecsengési idő és T60</h3>
@@ -205,47 +206,6 @@ dl.write(exc + g * filtered);
 out1 = d; // Hang kiadása a kimenetre
 </code></pre>
 <div class="box"><b>Használat Max-ben:</b> a gen~ bemenetére (<code>in1</code>) kb. egy periódus hosszú zajimpulzus kell (1000/freq ms), pl. <code>[noise~]</code> × <code>[line~]</code>, a <code>[line~]</code>-nek <code>1, 0 2.3</code> üzenetet küldve 432 Hz-nél. A paramétereket üzenetként küldhetjük a gen~-nek (pl. <code>freq 220</code>, <code>t60 2</code>).</div>
-
-<h3>SuperCollider – Részletesen kommentelt implementáció</h3>
-<pre><code>SynthDef(\ksManual, { |out=0, freq=432, t60=3, damp=0.5, amp=0.4, beta=0.1, dyn=0.5, t_trig=1|
-
-    // Visszacsatolási tényező (g) kiszámítása a T60 lecsengési időből
-    var g   = 0.001.pow(1 / (freq * t60));
-
-    // Alap gerjesztő jel: fehérzaj impulzus, hossza pontosan egy periódus (betölti a hurkot)
-    var rawExc = WhiteNoise.ar * Trig1.ar(t_trig, freq.reciprocal);
-
-    // Dinamika szűrő: a zaj sávszélességének szűrése a dinamika paraméter alapján
-    var rL  = 0.95 * (1 - dyn);
-    var exc0 = OnePole.ar(rawExc, rL);
-
-    // Pengetési pozíció fésűszűrője (kivonjuk a késleltetett zajt, ha beta > 0)
-    var exc = exc0 - (DelayN.ar(exc0, 0.05, (beta * freq.reciprocal).max(ControlDur.ir)) * (beta > 0));
-
-    // Helyi visszacsatolás olvasása a hurokból
-    var fb  = LocalIn.ar(1);
-
-    // Késleltetővonal a hurokban, kompenzálva a vezérlőblokk és a hurokszűrő (damp minta) késését
-    var del = DelayC.ar(exc + fb, 0.1, (freq.reciprocal - ControlDur.ir - (damp * SampleDur.ir)).max(0.0001));
-
-    // Kétpontos átlagoló (FIR) aluláteresztő a hurokban: (1-damp)*x[n] + damp*x[n-1]
-    var lp  = (del * (1 - damp)) + (Delay1.ar(del) * damp);
-
-    // Visszacsatolás írása a hurok végén a csillapított és skálázott jellel
-    LocalOut.ar(lp * g);
-
-    // Automatikus kilépés, ha a hang lecsengett és elhalkult
-    DetectSilence.ar(del, 0.0001, 0.5, doneAction: 2);
-
-    // Sztereó kimenetre küldés a megadott amplitúdóval
-    Out.ar(out, (del * amp) ! 2);
-}).add;
-
-// Előbb indítsd el a szervert: s.boot;
-// A SynthDef.add aszinkron: az alábbi sort a SynthDef hozzáadása után, külön futtasd.
-Synth(\ksManual, [\freq, 432, \t60, 3, \damp, 0.5, \beta, 0.1, \dyn, 0.5]);
-</code></pre>
-<div class="box warn"><b>Korlát:</b> a LocalIn/LocalOut egy vezérlőblokknyi (alapesetben 64 minta) késleltetést ad a visszacsatolásba, ezért a példa csak \(f<1/\text{ControlDur}\) alatt hangol pontosan (44,1 kHz-en kb. 690 Hz). Magasabb hangokhoz csökkentsd a blokkméretet: <code>s.options.blockSize = 16; s.reboot;</code></div>
 </div></section>
 
 <section id="p-eks"><div class="card">
@@ -299,7 +259,7 @@ Synth(\ksManual, [\freq, 432, \t60, 3, \damp, 0.5, \beta, 0.1, \dyn, 0.5]);
 <tr><td><b>T60-mérés</b></td><td>Állíts be 3 s-ot, és mérd meg dB-skálán, mikor esik az alaphang 60 dB-lel. Ellenőrizd a \(g\) képletet.</td></tr>
 <tr><td><b>Pengetési pozíció</b></td><td>Próbáld ki \(\beta=\tfrac12,\tfrac13,\tfrac14\) értéket, és keresd meg a spektrumban a kieső felharmonikusokat.</td></tr>
 <tr><td><b>Zajimpulzus hossza</b></td><td>Változtasd az impulzus hosszát (fél, egy, két periódus), és hallgasd meg a különbséget.</td></tr>
-<tr><td><b>Dob-változat</b></td><td>Valósítsd meg az előjelcserés változatot SuperCollider-ben vagy gen~-ben, \(b=1;\,0{,}5;\,0\) értékekkel.</td></tr>
+<tr><td><b>Dob-változat</b></td><td>Valósítsd meg az előjelcserés változatot gen~-ben, \(b=1;\,0{,}5;\,0\) értékekkel.</td></tr>
 <tr><td><b>Stabilitás</b></td><td>Emeld \(g\)-t rövid időre 1 fölé (nagyon kis hangerővel!), és figyeld a jel növekedését.</td></tr>
 </table></div>
 
@@ -424,6 +384,107 @@ function pk(){
 }
 $('pkb').oninput=pk;
 idle();frame();
+</script>
+<script>
+(function(){
+const TAU=2*Math.PI,nf=(x,d)=>(+x).toFixed(d).replace('.',','),sn=(x,d)=>(x>0?'+':'')+nf(x,d);
+const tx=(g,s,x,y,c)=>{let z=12;g.font=z+'px sans-serif';const w=g.measureText(s).width,M=g._W||1e9;if(x+w>M-4){if(w>M-8){z=Math.max(7,12*(M-8)/w);g.font=z+'px sans-serif';x=4}else x=M-4-w}g.fillStyle=c||'#1c1a17';g.fillText(s,x,y)};
+function wave(g,y,x0,y0,w,h,t,dur){const st=y.length/w,tp=t<0?0:t/dur*w;for(let X=0;X<w;X++){let mn=1,mx=-1;const a=Math.floor(X*st),b=Math.min(y.length,Math.floor((X+1)*st)+1);for(let i=a;i<b;i++){const v=y[i];if(v<mn)mn=v;if(v>mx)mx=v}g.fillStyle=X<tp?'#ff2e8a':'#2f6f8f';g.fillRect(x0+X,y0+h/2-mx*h/2,1,Math.max(1,(mx-mn)*h/2))}}
+function res(y,f,s,a,fs){const r=Math.exp(-s/fs),th=TAU*f/fs,a1=2*r*Math.cos(th),a2=-r*r;a*=Math.sin(th)||1;let y1=0,y2=0;for(let n=0;n<y.length;n++){const v=(n?0:1)+a1*y1+a2*y2;y[n]+=a*v;y2=y1;y1=v}}
+function ks(fs,o){const f=o.f,S=o.S,Dt=fs/f,ip=o.ip||'ap';let N,r=0;
+ if(ip==='ap'){N=Math.max(1,Math.floor(Dt-S-.5));r=Dt-S-N}else if(ip==='lin'){N=Math.max(1,Math.floor(Dt-S));r=Dt-S-N}else N=Math.max(1,Math.round(o.corr===false?Dt:Dt-S));
+ const c=(1-r)/(1+r),g=Math.pow(.001,1/(f*o.t60)),B=Math.max(2,Math.round(Dt)),L=Math.max(1,Math.round((o.nl||1)*B)),p=Math.round((o.beta||0)*B),E=L+p;
+ let sd=12345;const rnd=()=>{sd=(sd+0x6D2B79F5)|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+ const x=new Float32Array(L),e=new Float32Array(E),R=.95*(1-.5);let m=0,sum=0;
+ for(let i=0;i<L;i++){const w=o.uni?rnd():rnd()*2-1;m=(1-R)*w+R*m;x[i]=m;sum+=m}const dc=sum/L;if(!o.uni)for(let i=0;i<L;i++)x[i]-=dc;
+ for(let i=0;i<E;i++)e[i]=(i<L?x[i]:0)-(p>0&&i>=p&&i-p<L?x[i-p]:0);
+ const total=Math.floor(fs*Math.min(o.t60*1.1,4)),y=new Float32Array(total);let apx=0,apy=0,up=0;
+ for(let n=0;n<total;n++){const u=(1-S)*(n>=N?y[n-N]:0)+S*(n>N?y[n-N-1]:0);let a;if(ip==='ap'){a=c*(u-apy)+apx;apx=u;apy=a}else if(ip==='lin'){a=(1-r)*u+r*up;up=u}else a=u;y[n]=(n<E?e[n]:0)+g*a}
+ let pk=0;for(let i=0;i<total;i++)pk=Math.max(pk,Math.abs(y[i]));const k=.5/(pk||1);for(let i=0;i<total;i++){y[i]*=k;if(i>total-1500)y[i]*=(total-i)/1500}
+ y.info={N,r,c,g,Dt,e,L,B,dc};return y}
+function pitch(y,fs,f){const s0=Math.floor(.12*fs),D=fs/f,lo=Math.floor(D*.8),hi=Math.ceil(D*1.25),W=Math.min(4096,y.length-s0-hi-1);if(W<400)return f;const r=[];
+ for(let l=lo;l<=hi;l++){let a=0,b1=0,b2=0;for(let i=0;i<W;i++){const u=y[s0+i],v=y[s0+i+l];a+=u*v;b1+=u*u;b2+=v*v}r.push(a/Math.sqrt(b1*b2+1e-12))}
+ let bi=0;r.forEach((v,i)=>{if(v>r[bi])bi=i});let d=0;if(bi>0&&bi<r.length-1){const a=r[bi-1],b=r[bi],c=r[bi+1];d=.5*(a-c)/(a-2*b+c||1)}return fs/(lo+bi+d)}
+const fC=(lo,hi,v)=>['f','Frekvencia f',lo,hi,v,x=>x+' Hz'],tC=['t','Lecsengés T60',5,80,30,v=>nf(v/10,1)+' s'],sC=['s','Simítás S (½ = átlag)',0,50,50,v=>nf(v/100,2)],fsC=['fs','Mintavétel fs',8,48,44,v=>v+' kHz'];
+const P1=q=>({f:q.f,S:q.s/100,t60:q.t/10}),gk=(p,k,fs)=>{const w=TAU*k*p.f/fs;return Math.pow(.001,1/(p.f*p.t60))*Math.hypot((1-p.S)+p.S*Math.cos(w),p.S*Math.sin(w))};
+const B=[
+{t:'Az algoritmus lépésről lépésre – a késleltetővonal élő tartalma',c:[fC(55,880,432),tC,sC],P:P1,S:(p,fs)=>ks(fs,p),
+ I:(p,q,y)=>'N = '+y.info.N+' minta a vonalban · törtrész r = '+nf(y.info.r,2)+' · g = '+nf(y.info.g,5),
+ D:(g,W,H,p,t,y,fs)=>{const I=y.info,N=I.N+1,n=t<0?N:Math.max(N,Math.floor(t*fs)),h1=H*.5,cy=h1/2+8,bw=(W-20)/N;
+  g.strokeStyle='#ddd';g.beginPath();g.moveTo(10,cy);g.lineTo(W-10,cy);g.stroke();g.fillStyle='#2f6f8f';
+  for(let i=0;i<N;i++){const v=y[Math.max(0,n-N+i)]||0;g.fillStyle=i>N-1-Math.max(2,N/12)?'#ff2e8a':'#2f6f8f';g.fillRect(10+i*bw,cy-v*(h1-20),Math.max(1,bw-(bw>3?1:0)),Math.max(1,Math.abs(v)*(h1-20)))}
+  tx(g,'a vonal tartalma '+nf(n/fs,3)+' s-nál (rózsaszín: a most beírt minták) – kör után simább és tompább',10,14);wave(g,y,0,h1+14,W,H-h1-18,t,y.length/fs)}},
+{t:'1. Differenciaegyenlet és a szűrő – a felharmonikusok sorsa',c:[fC(55,880,220),tC,sC],P:P1,S:(p,fs)=>ks(fs,p),
+ I:(p)=>'DC erősítés: 1 · Nyquist erősítés: '+nf(Math.abs(1-2*p.S),2)+' · körönkénti g = '+nf(Math.pow(.001,1/(p.f*p.t60)),5),
+ D:(g,W,H,p,t,y,fs)=>{const fm=Math.min(5000,fs/2),X=f=>30+f/fm*(W-50),Y=a=>H-34-a*(H-70),tt=Math.max(t,0);g.strokeStyle='#bbb';g.beginPath();g.moveTo(30,Y(0));g.lineTo(W-20,Y(0));g.stroke();
+  g.strokeStyle='#ff9a3c';g.lineWidth=2;g.beginPath();for(let i=0;i<=120;i++){const f=fm*i/120,w=TAU*f/fs,a=Math.hypot((1-p.S)+p.S*Math.cos(w),p.S*Math.sin(w));i?g.lineTo(X(f),Y(a)):g.moveTo(X(f),Y(a))}g.stroke();g.lineWidth=1;
+  for(let k=1;k*p.f<fm;k++){const a=Math.pow(gk(p,k,fs),tt*p.f);g.fillStyle='#2f6f8f';g.fillRect(X(k*p.f)-3,Y(a),6,Math.max(1,a*(H-70)));if(k<=12)tx(g,k+'',X(k*p.f)-3,H-20)}
+  tx(g,'narancs: a hurokszűrő |H_lp(f)| (átlagoló: cos(ω/2)) · kék: a k-adik felharmonikus amplitúdója az idő függvényében',30,14);tx(g,'0',26,H-6);tx(g,nf(fm/1000,1)+' kHz',W-60,H-6)}},
+{t:'2. Hangolási pontosság – a szűrő is késleltet',c:[fC(55,1760,880),fsC,['m','Hangolás',[['nc','Korrekció nélkül: N = fs/f'],['half','Fél minta korrekció, egész N'],['ap','Törtrész + allpass']],'nc']],
+ P:q=>({f:q.f,S:.5,t60:2,ip:q.m==='ap'?'ap':'int',corr:q.m!=='nc'}),S:(p,fs)=>ks(fs,p),
+ I:(p,q,y,fs)=>'D = fs/f = '+nf(fs/q.f,2)+' · N = '+y.info.N+' · hurok = N+½'+(y.info.r?'+r':'')+' = '+nf(y.info.N+.5+(p.ip==='ap'?y.info.r:0),2)+' minta',
+ D:(g,W,H,p,t,y,fs,q)=>{const fa=pitch(y,fs,q.f),ct=1200*Math.log2(fa/q.f),X=c=>W/2+Math.max(-60,Math.min(60,c))/60*(W/2-30),ok=Math.abs(ct)<5;g.fillStyle='#bfe4f5';g.fillRect(30,80,W-60,16);g.fillStyle='#9fd68a';g.fillRect(X(-5),80,X(5)-X(-5),16);
+  for(let c=-50;c<=50;c+=10){g.fillStyle='#1c1a17';g.fillRect(X(c),76,1,24);tx(g,c+'',X(c)-8,114)}
+  const j=t<0?0:Math.sin(t*40)*1.5;g.strokeStyle=ok?'#2a9d4a':'#ff2e8a';g.lineWidth=4;g.beginPath();g.moveTo(X(ct)+j,56);g.lineTo(X(ct)+j,104);g.stroke();g.lineWidth=1;
+  tx(g,'hangoló (cent): zöld = ±5 cent',30,16);tx(g,'cél: '+nf(q.f,1)+' Hz · mért: '+nf(fa,1)+' Hz',30,150);tx(g,'eltérés: '+sn(ct,1)+' cent'+(ok?' ✔ tiszta':ct<0?' (mély)':' (magas)'),30,172,ok?'#2a9d4a':'#d00');wave(g,y,0,190,W,44,t,y.length/fs)}},
+{t:'3. Törtrészes késleltetés – interpoláció',c:[fC(55,1760,880),['m','Interpoláció',[['int','Nincs (egész késleltetés)'],['lin','Lineáris'],['ap','Allpass']],'lin'],sC],
+ P:q=>({f:q.f,S:q.s/100,t60:2,ip:q.m}),S:(p,fs)=>ks(fs,p),
+ I:(p,q,y,fs)=>'r = '+nf(y.info.r,3)+' · allpass C = '+nf(y.info.c,3)+' · mért hangolás: '+sn(1200*Math.log2(pitch(y,fs,q.f)/q.f),1)+' cent',
+ D:(g,W,H,p,t,y,fs)=>{const rl=(fs/p.f-p.S)%1,X=w=>40+w/Math.PI*(W-60),Y=a=>H-40-a*(H-80),mg=w=>Math.hypot((1-rl)+rl*Math.cos(w),rl*Math.sin(w));g.strokeStyle='#bbb';g.beginPath();g.moveTo(40,Y(0));g.lineTo(W-20,Y(0));g.stroke();
+  const cur=(k,col,fn,lab)=>{g.strokeStyle=col;g.lineWidth=p.ip===k?4:1.5;g.beginPath();for(let i=0;i<=100;i++){const w=Math.PI*i/100;i?g.lineTo(X(w),Y(fn(w))):g.moveTo(X(w),Y(fn(w)))}g.stroke()};
+  cur('lin','#2f6f8f',mg);cur('ap','#ff2e8a',()=>1);cur('int','#ff9a3c',()=>1);g.lineWidth=1;
+  for(let k=1;k*p.f<fs/2;k++){g.fillStyle='#1c1a17';g.fillRect(X(TAU*k*p.f/fs),Y(0)-5,1,10)}
+  tx(g,'kék: lineáris (aluláteresztő hatás) · rózsaszín/narancs: allpass, egész (sík amplitúdó) · vastag = a választott · jelek: felharmonikusok',40,14);tx(g,'0',36,H-14);tx(g,nf(fs/2000,1)+' kHz',W-70,H-14);wave(g,y,0,H-30,W,26,t,y.length/fs)}},
+{t:'4. Lecsengési idő és T60 – a felharmonikusok külön lecsengése',c:[fC(55,880,432),tC,sC],P:P1,S:(p,fs)=>ks(fs,p),
+ I:p=>'g = 10^(−3/(f·T60)) = '+nf(Math.pow(.001,1/(p.f*p.t60)),5)+' · alap T60 ≈ '+nf(p.t60,1)+' s',
+ D:(g,W,H,p,t,y,fs)=>{const dur=y.length/fs,X=s=>40+s/dur*(W-60),Yd=d=>24+(-d)/70*(H-60);g.strokeStyle='#bbb';g.setLineDash([4,4]);g.beginPath();g.moveTo(40,Yd(60));g.lineTo(W-20,Yd(60));g.stroke();g.setLineDash([]);tx(g,'−60 dB',4,Yd(60)-3);tx(g,'0 dB',8,Yd(0)+4);
+  [1,2,3,5,8,12].forEach((k,i)=>{if(k*p.f>=fs/2)return;const gg=gk(p,k,fs),dps=20*Math.log10(gg)*p.f,t1=Math.min(dur,-70/dps);g.strokeStyle='hsl('+(330-i*40)+',80%,45%)';g.lineWidth=2;g.beginPath();g.moveTo(X(0),Yd(0));g.lineTo(X(t1),Yd(dps*t1));g.stroke();
+   tx(g,'k='+k+': T60 = '+nf(-3/(p.f*Math.log10(gg)),2)+' s',W-150,20+i*14,'hsl('+(330-i*40)+',80%,40%)')});g.lineWidth=1;if(t>=0){g.fillStyle='#1c1a17';g.fillRect(X(t),20,1,H-50)}tx(g,'idő (s) →',W-80,H-8)}},
+{t:'5. Gerjesztés – a zajimpulzus',c:[fC(55,880,220),['l','Zaj hossza',25,300,100,v=>v+' % periódus'],['m','Zajminta',[['dc','Átlagmentes (előjeles zaj)'],['raw','Előjel nélküli zaj (van DC)']],'dc'],tC],
+ P:q=>({f:q.f,S:.5,t60:q.t/10,nl:q.l/100,uni:q.m==='raw'}),S:(p,fs)=>ks(fs,p),
+ I:(p,q,y)=>'zaj: '+y.info.L+' minta · periódus: '+y.info.B+' minta · a zaj átlaga (DC): '+nf(y.info.dc,3),
+ D:(g,W,H,p,t,y,fs)=>{const I=y.info,e=I.e,E=e.length,h1=H*.5,cy=h1/2+8,bw=(W-20)/E;let mx=1e-9;for(let i=0;i<E;i++)mx=Math.max(mx,Math.abs(e[i]));
+  for(let i=0;i<E;i++){g.fillStyle=i<I.B?'#ff2e8a':'#ff9a3c';const v=e[i]/mx*(h1/2-8);g.fillRect(10+i*bw,v>0?cy-v:cy,Math.max(1,bw-.5),Math.max(1,Math.abs(v)))}
+  const xb=10+Math.min(I.B,E)*bw;g.fillStyle='#1c1a17';g.fillRect(xb,8,1,h1);g.strokeStyle='#ddd';g.beginPath();g.moveTo(10,cy);g.lineTo(W-10,cy);g.stroke();
+  tx(g,'a gerjesztés (rózsaszín: az első periódus · narancs: rárakódó második periódus-rész)',10,12);wave(g,y,0,h1+14,W,H-h1-18,t,y.length/fs)}},
+{t:'6. Fizikai háttér – a húr és a hullámvezető',c:[['L','Húrhossz L',20,120,65,v=>v+' cm'],['T','Feszítés T',50,600,315,v=>v+' N'],['u','Hosszsúly μ',3,30,10,v=>nf(v/10,1)+' g/m'],['b','Pengetés helye β',5,50,15,v=>nf(v/100,2)]],
+ P:q=>{const L=q.L/100,mu=q.u/1e4,c=Math.sqrt(q.T/mu);return{L,mu,c,f:c/(2*L),beta:q.b/100}},S:(p,fs)=>ks(fs,{f:Math.min(3000,Math.max(40,p.f)),S:.5,t60:3,beta:p.beta}),
+ I:p=>'c = √(T/μ) = '+nf(p.c,1)+' m/s · f = c/2L = '+nf(p.f,1)+' Hz · körülfordulás: '+nf(1000*2*p.L/p.c,2)+' ms',
+ D:(g,W,H,p,t,y,fs)=>{const x0=30,Wd=W-60,A=48,cy=88,L=p.L,be=p.beta,ph=t<0?0:(t*.5)%1,ct=2*L*ph,g0=x=>{x=((x%(2*L))+2*L)%(2*L);const sg=x>L?-1:1;if(sg<0)x=2*L-x;const u=x/L;return sg*(u<be?u/be:(1-u)/(1-be))};
+  const line=(fn,col,lw)=>{g.strokeStyle=col;g.lineWidth=lw;g.beginPath();for(let i=0;i<=Wd;i+=3){const u=i/Wd*L,v=fn(u);i?g.lineTo(x0+i,cy-v*A):g.moveTo(x0+i,cy-v*A)}g.stroke()};
+  g.fillStyle='#1c1a17';g.fillRect(x0-6,cy-A-6,6,2*A+12);g.fillRect(x0+Wd,cy-A-6,6,2*A+12);line(u=>.5*g0(u-ct),'#ff2e8a',1.5);line(u=>.5*g0(u+ct),'#2f6f8f',1.5);line(u=>.5*g0(u-ct)+.5*g0(u+ct),'#1c1a17',3);g.lineWidth=1;
+  tx(g,'rózsaszín: ½·y(x−ct) jobbra · kék: ½·y(x+ct) balra · fekete: összeg (a húr alakja) – lassítva',10,14);tx(g,'a végeken előjelet váltanak és visszaverődnek',10,162);wave(g,y,0,184,W,50,t,y.length/fs)}},
+{t:'7. Korlátok – inharmonicitás (merev húr)',c:[fC(55,600,220),['B','Inharmonicitás B',0,100,20,v=>nf(v/1e4,4)],tC],
+ P:q=>({f:q.f,B:q.B/1e4,t60:q.t/10}),
+ S:(p,fs)=>{const y=new Float32Array(Math.floor(fs*Math.min(p.t60*1.1,4))),g0=Math.pow(.001,1/(p.f*p.t60));for(let k=1;k<=60;k++){const fk=k*p.f*Math.sqrt(1+p.B*k*k);if(fk>5000||fk>=fs/2)break;const dp=-20*Math.log10(g0*Math.abs(Math.cos(Math.PI*fk/fs)))*p.f;res(y,fk,dp*Math.LN10/20,1/Math.pow(k,.8),fs)}let pk=0;for(const v of y)pk=Math.max(pk,Math.abs(v));for(let i=0;i<y.length;i++)y[i]*=.5/(pk||1);return y},
+ I:p=>'a 8. részhang eltérése a harmonikustól: '+sn(1200*Math.log2(Math.sqrt(1+p.B*64)),1)+' cent',
+ D:(g,W,H,p,t,y,fs)=>{const X=f=>20+f/5000*(W-40),tt=Math.max(t,0),g0=Math.pow(.001,1/(p.f*p.t60));g.fillStyle='#1c1a17';
+  for(let k=1;k*p.f<5000;k++){g.strokeStyle='#bbb';g.setLineDash([3,3]);g.beginPath();g.moveTo(X(k*p.f),30);g.lineTo(X(k*p.f),H-40);g.stroke();g.setLineDash([])}
+  for(let k=1;k<=60;k++){const fk=k*p.f*Math.sqrt(1+p.B*k*k);if(fk>5000||fk>=fs/2)break;const dp=-20*Math.log10(g0*Math.abs(Math.cos(Math.PI*fk/fs)))*p.f,a=Math.pow(10,-dp*tt/20)/Math.pow(k,.8),h=a*(H-80);g.fillStyle='#2f6f8f';g.fillRect(X(fk)-3,H-40-h,6,Math.max(1,h));if(k<=12)tx(g,k+'',X(fk)-3,H-26)}
+  tx(g,'szaggatott: pontos harmonikusok · kék: a valódi részhangok (feljebb csúsznak) – animált lecsengéssel',20,14);tx(g,'0',16,H-8);tx(g,'5 kHz',W-46,H-8)}},
+{t:'Pengetési pozíció – fésűszűrő (EKS)',pos:'eks',c:[fC(55,880,220),['b','Pengetés helye β',1,50,12,v=>nf(v/100,2)],tC],
+ P:q=>({f:q.f,S:.5,t60:q.t/10,beta:q.b/100}),S:(p,fs)=>ks(fs,p),
+ I:p=>'β = '+nf(p.beta,2)+' · kiejtett harmonikusok: minden '+(p.beta>0?nf(1/p.beta,1):'–')+'. (sin(π·k·β) = 0)',
+ D:(g,W,H,p,t,y,fs)=>{const K=Math.min(24,Math.floor(fs/2/p.f)),bw=(W-30)/K,tt=Math.max(t,0),g0=Math.pow(.001,1/(p.f*p.t60)),cy=34,Wd=W-60;
+  g.strokeStyle='#1c1a17';g.lineWidth=2;g.beginPath();g.moveTo(30,cy+24);g.lineTo(30+p.beta*Wd,cy-20);g.lineTo(30+Wd,cy+24);g.stroke();g.lineWidth=1;tx(g,'a húr kezdeti alakja (a csúcs a pengetés helye)',30,12);
+  for(let k=1;k<=K;k++){const a0=Math.abs(Math.sin(Math.PI*k*p.beta)),a=a0*Math.pow(g0*Math.abs(Math.cos(Math.PI*k*p.f/fs)),tt*p.f),h=a*(H-120);g.fillStyle=a0<.03?'#ff2e8a':'#2f6f8f';g.fillRect(15+(k-1)*bw+2,H-34-h,bw-4,Math.max(2,h));tx(g,k+'',15+(k-1)*bw+bw/2-4,H-18)}
+  wave(g,y,0,H-14,W,0,t,1)}}
+];
+const AV=[];let cur=null,ac=null,tok=0;const h3=[...document.querySelectorAll('#p-math h3')];
+B.forEach((b,i)=>{const el=document.createElement('div');el.className='avb';
+ el.innerHTML='<b>🎛 Hang + animált kép: '+b.t+'</b>'+b.c.map(c=>Array.isArray(c[2])?'<div class="ctl"><label>'+c[1]+'</label><select>'+c[2].map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('')+'</select><span></span></div>':'<div class="ctl"><label>'+c[1]+'</label><input type="range" min="'+c[2]+'" max="'+c[3]+'" value="'+c[4]+'"><output></output></div>').join('')+'<button class="btn">🎸 Pengetés</button> <label style="font-size:13px"><input type="checkbox"> élő újrapengetés paraméterváltáskor</label><div class="box"></div><canvas style="height:240px"></canvas>';
+ const rows=[...el.querySelectorAll('.ctl')],ins=rows.map(r=>r.querySelector('input,select')),btn=el.querySelector('button'),auto=el.querySelector('label input'),box=el.querySelector('.box'),cv=el.querySelector('canvas');
+ b.c.forEach((c,j)=>{if(Array.isArray(c[2]))ins[j].value=c[3]});let y,fs,p,q,dbt=0;
+ const calc=()=>{q={};b.c.forEach((c,j)=>q[c[0]]=Array.isArray(c[2])?ins[j].value:+ins[j].value);fs=q.fs?q.fs*1000:44100;p=b.P(q);y=b.S(p,fs,q);rows.forEach((r,j)=>{const o=r.querySelector('output');if(o)o.textContent=b.c[j][5](q[b.c[j][0]])});box.textContent=b.I?b.I(p,q,y,fs):''};
+ const draw=t=>{if(!y||!fit(cv))return;const cw=cv.clientWidth,k=Math.min(1,cw/420),hh=Math.round(240*k)+'px';if(cv.style.height!==hh){cv.style.height=hh;if(!fit(cv))return}const d=window.devicePixelRatio||1,g=cv.getContext('2d'),W=cw/k,H=240;g.setTransform(d*k,0,0,d*k,0,0);g.clearRect(0,0,W,H);g._W=W;b.D(g,W,H,p,t==null?-1:t,y,fs,q)};
+ const play=()=>{try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();calc();if(cur)try{cur.stop()}catch(e){}
+  const buf=ac.createBuffer(1,y.length,fs);buf.copyToChannel(y,0);const s=ac.createBufferSource();s.buffer=buf;s.connect(ac.destination);s.start();cur=s;
+  const my=++tok,t0=ac.currentTime,dur=y.length/fs;(function f(){if(my!==tok)return;const t=ac.currentTime-t0;if(t<dur){draw(t);requestAnimationFrame(f)}else draw(-1)})()}catch(e){console.error(e)}};
+ ins.forEach(x=>x.oninput=()=>{tok++;calc();draw(-1);if(auto.checked){clearTimeout(dbt);dbt=setTimeout(play,150)}});btn.onclick=play;calc();AV.push(()=>{if(y)draw(-1)});
+ if(b.pos==='eks'){const t=[...document.querySelectorAll('#p-eks h3')].find(h=>h.textContent.includes('Források'));t?t.before(el):document.querySelector('#p-eks .card').appendChild(el)}
+ else(i+1<h3.length?h3[i+1].before(el):h3[i].closest('.card').appendChild(el))});
+const all=()=>AV.forEach(f=>f());tabs.forEach(b=>b.addEventListener('click',()=>setTimeout(all,50)));addEventListener('resize',all);setTimeout(all,300);addEventListener('load',all);
+})();
 </script>
 </body>
 </html>
