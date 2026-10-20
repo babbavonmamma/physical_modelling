@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Tartalomjegyzék</title><style>
+:root{--paper:#f2ede2;--ink:#1c1a17;--pink:#ff2e8a;--blue:#bfe4f5;--deep:#2f6f8f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{color-scheme:light}*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:16px 16px 60px}
+h1{font-family:'Marker Felt','Segoe Print',cursive;color:var(--pink);-webkit-text-stroke:1.2px var(--ink);font-size:clamp(24px,4vw,38px);margin:8px 0}
+.card{background:#fffdf8;border:2.5px solid var(--ink);border-radius:16px;padding:18px 20px;margin-bottom:18px;box-shadow:4px 4px 0 var(--ink)}
+ol{list-style:none;margin:0;padding:0}
+li{margin:0 0 12px}
+li:last-child{margin-bottom:0}
+a.item{display:flex;align-items:center;gap:14px;text-decoration:none;color:var(--ink);background:#fff;border:2px solid var(--ink);border-radius:14px;padding:10px 14px;box-shadow:3px 3px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+a.item:hover,a.item:focus-visible{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--pink);outline:none}
+a.item:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.num{flex:none;display:inline-block;background:var(--ink);color:var(--paper);border-radius:14px;padding:2px 12px;font-size:14px;font-weight:800;min-width:38px;text-align:center}
+.ttl{font-weight:800;font-size:17px;color:var(--deep);flex:1}
+.file{flex:none;font-family:'Courier New',monospace;font-size:12px;font-weight:bold;color:var(--deep);background:#eaf5fb;border-radius:4px;padding:1px 6px}
+.skel{height:48px;border:2px dashed var(--deep);border-radius:14px;background:#eaf5fb;margin-bottom:12px;animation:p 1s infinite alternate}
+@keyframes p{to{opacity:.45}}
+@media(max-width:560px){.file{display:none}.ttl{font-size:15px}}
+</style></head><body><div class="wrap">
+<h1>♪ Tartalomjegyzék</h1>
+<div class="card"><ol id="list"><li class="skel"></li><li class="skel"></li><li class="skel"></li></ol></div>
+</div>
+<script>
+// Az almappa neve, ahol az 1.html, 2.html, ... fájlok vannak.
+const FOLDER = 'physmod/';
+const MAX = 200;   // legfeljebb ennyi sorszámig keres
+const GAP = 3;     // ennyi egymás utáni hiányzó sorszám után abbahagyja
+const BATCH = 8;   // ennyi fájlt kérdez le egyszerre
+
+const list = document.getElementById('list');
+
+function clean(t){ return (t||'').replace(/^[\s♪♫]+/,'').replace(/\s+/g,' ').trim(); }
+
+async function probe(n){
+  const file = n + '.html';
+  try{
+    const r = await fetch(FOLDER + file, {cache:'no-cache'});
+    if(!r.ok) return null;
+    const doc = new DOMParser().parseFromString(await r.text(), 'text/html');
+    const h1 = doc.querySelector('h1');
+    const title = clean(h1 ? h1.textContent : '') || clean(doc.title);
+    if(!h1 && !doc.title) return null;
+    return {n, file, title: title || file};
+  }catch(e){ return null; }
+}
+
+function render(items){
+  list.innerHTML = '';
+  items.forEach(it=>{
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.className = 'item'; a.href = FOLDER + it.file;
+    a.innerHTML = '<span class="num"></span><span class="ttl"></span><span class="file"></span>';
+    a.children[0].textContent = it.n;
+    a.children[1].textContent = it.title;
+    a.children[2].textContent = it.file;
+    li.appendChild(a); list.appendChild(li);
+  });
+}
+
+(async function(){
+  const found = []; let miss = 0, n = 1;
+  while(n <= MAX && miss < GAP){
+    const nums = Array.from({length:BATCH},(_,i)=>n+i);
+    const res = await Promise.all(nums.map(probe));
+    for(const r of res){
+      if(r){ found.push(r); miss = 0; } else { miss++; }
+      if(miss >= GAP) break;
+    }
+    n += BATCH;
+  }
+  found.sort((a,b)=>a.n-b.n);
+  render(found);
+})();
+</script></body></html>
