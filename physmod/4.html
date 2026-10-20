@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="hu"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><title>Modális szintézis 2/2</title>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script><style>
+:root{--paper:#f2ede2;--ink:#1c1a17;--card:#fffdf8;--pink:#ff2e8a;--blue:#bfe4f5;--tint:#eaf5fb;--deep:#2f6f8f;--code:#1c1a17;--cfg:#fff;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);color-scheme:light}
+
+:root[data-theme="dark"]{--paper:#1d1b19;--ink:#f2ede2;--card:#2a2723;--pink:#ff5fa5;--blue:#2c4a5a;--tint:#243540;--deep:#7cc4e4;--code:#111;--cfg:#2a2723}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.5}
+.wrap{max-width:1000px;margin:0 auto;padding:16px 16px 60px}
+h1{font-family:'Marker Felt','Segoe Print',cursive;color:var(--pink);font-size:clamp(24px,4vw,38px);margin:8px 0}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+nav button{color:var(--ink);font-weight:800;font-size:13px;border:2px solid var(--ink);border-radius:20px;background:var(--card);padding:7px 14px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+nav button.active{background:var(--ink);color:var(--paper)}
+section{display:none}section.active{display:block}
+.card{background:var(--card);border:2.5px solid var(--ink);border-radius:16px;padding:18px 20px;margin-bottom:18px;box-shadow:4px 4px 0 var(--ink)}
+h2{font-family:'Marker Felt','Segoe Print',cursive;color:var(--pink);font-size:23px;margin:0 0 6px}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{border:1.5px solid var(--ink);padding:7px 10px;text-align:left;vertical-align:top}th{background:var(--blue)}
+pre{background:var(--code);color:#fff;padding:14px;border-radius:10px;overflow-x:auto;font-size:13px;border:2px solid var(--deep)}
+code{font-family:'Courier New',monospace;background:var(--tint);color:var(--deep);padding:1px 5px;border-radius:4px;font-weight:bold}pre code{background:none;color:inherit;padding:0}
+.box{border:2.5px dashed var(--deep);background:var(--tint);border-radius:12px;padding:10px 14px;margin:12px 0;font-size:14px}
+.warn{border-color:var(--pink)}
+.k{background:var(--tint);border:2px dashed var(--ink);border-radius:10px;padding:8px 12px;margin:8px 0;font-size:14px}
+.ctl{display:grid;grid-template-columns:170px 1fr 80px;gap:8px;align-items:center;font-size:14px;margin:6px 0}
+.ctl input{width:100%}.ctl output{font-family:'Courier New',monospace;font-size:13px;font-weight:bold;color:var(--deep)}
+select{font-size:14px;padding:4px;background:var(--cfg);color:var(--ink);border:2px solid var(--ink);border-radius:8px}
+.btn{font-weight:800;border:2px solid var(--ink);border-radius:20px;background:var(--pink);color:#fff;padding:9px 20px;cursor:pointer;box-shadow:2px 2px 0 var(--ink);font-size:15px}
+canvas{display:block;width:100%;height:170px;background:var(--cfg);border:2px solid var(--ink);border-radius:10px;margin-top:10px}
+details.card>summary{cursor:pointer}details.card>summary h2{display:inline}
+@media(max-width:560px){.ctl{grid-template-columns:1fr 80px}.ctl label{grid-column:1/-1}}
+
+h1{-webkit-text-stroke:1.2px var(--ink)}h3{font-size:17px;margin:16px 0 6px;color:var(--deep)}
+:root{--yel:#fffbe6;--ptint:#ffe6f2}:root[data-theme="dark"]{--yel:#3a3520;--ptint:#3a2430}
+pre{box-shadow:3px 3px 0 var(--pink)}.k{background:var(--yel)}.box.warn{background:var(--ptint)}
+.intuition{border:2.5px solid var(--deep);background:var(--tint);border-radius:12px;padding:14px 16px;margin:16px 0;font-size:14.5px;box-shadow:3px 3px 0 var(--deep)}
+.intuition-title{font-weight:900;color:var(--deep);margin-bottom:8px;font-size:15px}
+.viz{margin-top:16px;border-top:2.5px dashed var(--deep);padding-top:4px}.viz select{font-size:14px}
+details.card>summary{list-style:none}details.card[open]>summary{margin-bottom:8px}
+:root[data-theme="light"]{color-scheme:light}:root[data-theme="dark"]{color-scheme:dark}
+#thm{margin-left:auto}
+.pre{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}.pre button{font-size:12.5px;font-weight:700;border:2px solid var(--ink);border-radius:16px;background:var(--card);color:var(--ink);padding:5px 10px;cursor:pointer}.pre button:hover{background:var(--blue)}
+</style></head><body><div class="wrap"><h1>♪ Modális szintézis 2/2</h1>
+<nav id="tabs"><button data-id="theory" class="active">Elmélet</button><button data-id="demo">Demó</button><button data-id="play">Játékmódok</button><button data-id="code">Kódok</button><button data-id="tasks">Feladatok</button><button data-id="ref">Szótár és források</button><button data-id="sum">Összefoglaló: hang + számítás</button><button data-id="qty">Mennyiségek: név, egység, számítás</button><button id="thm" type="button" title="Téma váltása">🌓 Téma: világos</button></nav>
+
+<section id="p-theory" class="active">
+<div class="card"><h2>1. A lánctól a folytonos tárgyig</h2>
+<p>Az 1/2 részben \(N\) tömegből \(N\) módus lett. Ha a láncot egyre sűrűbbre vesszük (\(N\to\infty\)), a tömegek folytonos tárgyba olvadnak: húr, rúd, membrán, lemez. A módusok száma végtelen, de a hang ugyanaz a három lista marad: \(\omega_n\), \(\sigma_n\), \(a_n\). A modális szintézis egyenlete nem változik:</p>
+<p>\[y(t)=\sum_n\frac{a_n}{\omega_{d,n}}e^{-\sigma_nt}\sin(\omega_{d,n}t),\qquad a_n=\frac{u_n(p)\,u_n(q)}{m_n}.\]</p>
+<p>Két dolog új. A módusalak már <b>függvény</b> (\(u_n(x)\), a hely folytonos változója), és a frekvenciák <b>zárt képletből</b> jönnek, nem mátrixból. A tárgy hangszínét leginkább a frekvenciák aránya adja: a húr felhangjai egész számú többszörösek (harmonikus), a rúdé és a membráné nem (inharmonikus, harangszerű).</p>
+<div class="scroll"><table><tr><th>Tárgy</th><th>Frekvenciák aránya</th><th>Jelleg</th></tr>
+<tr><td>Ideális húr</td><td>1 : 2 : 3 : 4 …</td><td>harmonikus, hangmagasság egyértelmű</td></tr>
+<tr><td>Szabad–szabad rúd</td><td>1 : 2,76 : 5,40 : 8,93</td><td>inharmonikus, xilofon, triangulum</td></tr>
+<tr><td>Befogott–szabad rúd</td><td>1 : 6,27 : 17,55</td><td>hangvilla, kalimba, a felhangok messze vannak</td></tr>
+<tr><td>Kör membrán</td><td>1 : 1,59 : 2,14 : 2,30 : 2,65</td><td>dob, a hangmagasság bizonytalan</td></tr></table></div></div>
+
+<div class="card"><h2>2. A húr és a merev húr</h2>
+<p>Az ideális húr (hossz \(L\), feszítőerő \(T\), hosszegységre jutó tömeg \(\mu\)) módusai:</p>
+<p>\[f_n=n f_1,\quad f_1=\frac1{2L}\sqrt{\frac T\mu},\quad u_n(x)=\sin\frac{n\pi x}{L},\quad m_n=\frac{\mu L}2.\]</p>
+<p>Az erősség így \(a_n\propto\sin(n\pi p/L)\sin(n\pi q/L)\), ahol \(p\) az ütés (pengetés), \(q\) a hallgatás helye. Ha \(p=L/4\), minden 4. módus csomópontba esik, tehát a 4., 8., 12. felharmonikus hiányzik. A gitáron ezért szól más a híd mellett és a fogólap fölött.</p>
+<p>A valódi húr merev is, ezért a felhangjai kissé magasabbra csúsznak [18][19]:</p>
+<p>\[f_n=nf_1\sqrt{1+Bn^2},\qquad B=\frac{\pi^3Ed^4}{64\,T L^2}.\]</p>
+<p>A \(B\) az <b>inharmonicitás</b>: vastag, rövid, laza húrnál nagy. Zongorában a mély húrok \(B\)-je miatt hangolják „nyújtva” a hangszert. Példa: \(B=4\cdot10^{-4}\), \(f_1=220\) Hz esetén a 10. felharmonikus \(2200\sqrt{1{,}04}=2243{,}6\) Hz, vagyis kb. 34 centtel magasabb a harmonikusnál.</p></div>
+
+<div class="card"><h2>3. Rudak</h2>
+<p>A rúd hajlító rezgésénél a frekvencia a hossz négyzetével csökken [13][15]:</p>
+<p>\[f_n=\frac{(\beta_nL)^2}{2\pi L^2}\sqrt{\frac{EI}{\rho A}},\qquad I=\frac{bh^3}{12}.\]</p>
+<p>Szabad–szabad rúdnál \(\beta_nL=4{,}730;\ 7{,}853;\ 10{,}996;\ 14{,}137\), majd \(n\ge3\)-ra jó közelítéssel \((n+\tfrac12)\pi\). Az arányok \((\beta_nL/4{,}730)^2\)-ből jönnek: 1 : 2,76 : 5,40 : 8,93. A hangszín gombja itt is a módusalak és az ütés helye: a rúd végén ütve minden módus egyformán megszólal, a közepén ütve a páros sorszámúak kiesnek.</p>
+<div class="k">🎹 A marimba- és xilofonlécek alját kivájják, hogy a 2. módus tiszta intervallumra (kb. 1 : 4, illetve 1 : 3) hangolódjon. A vastagság számít: \(f\propto h\), tehát a lécet kétszer vastagabbra véve a hang oktávval magasabb.</div></div>
+
+<div class="card"><h2>4. Membrán és lemez</h2>
+<p>A kör membrán (sugár \(R\), feszítés \(T\) [N/m], felületi sűrűség \(\sigma_s\)) módusai két indexűek: \(m\) a csomóátmérők, \(n\) a csomókörök száma (a perem is csomó) [19][21]:</p>
+<p>\[f_{mn}=\frac{j_{mn}}{2\pi R}\sqrt{\frac T{\sigma_s}},\qquad u_{mn}(r,\theta)=J_m\!\Big(j_{mn}\frac rR\Big)\cos m\theta.\]</p>
+<p>A \(j_{mn}\) a \(J_m\) Bessel-függvény \(n\). zérushelye. Az arányok nem egészek:</p>
+<div class="scroll"><table><tr><th>(m,n)</th><th>(0,1)</th><th>(1,1)</th><th>(2,1)</th><th>(0,2)</th><th>(3,1)</th><th>(1,2)</th></tr><tr><td>\(j_{mn}\)</td><td>2,405</td><td>3,832</td><td>5,136</td><td>5,520</td><td>6,380</td><td>7,016</td></tr><tr><td>\(f/f_{01}\)</td><td>1</td><td>1,593</td><td>2,136</td><td>2,295</td><td>2,653</td><td>2,917</td></tr></table></div>
+<p>A középpontban \(J_m(0)=0\) minden \(m>0\)-ra, így a dob közepét ütve csak a körszimmetrikus (\(m=0\)) módusok szólalnak meg, a hang mélyebb és tompább. A peremhez közel ütve minden módus gerjesztődik. A levegő terhelése a valódi dobban lejjebb tolja a frekvenciákat, ez a modell ezt nem tartalmazza.</p>
+<p><b>Lemez</b> (cintányér, harang): a hajlító hullámok sebessége a frekvenciával nő (<b>diszperzió</b>), \(\omega\propto k^2\), és \(\omega\propto\dfrac{h}{R^2}\sqrt{\dfrac{E}{\rho(1-\nu^2)}}\) [22]. Ebből adódik a méretezés: kétszeres vastagság kétszeres frekvenciát, felezett sugár négyszeres frekvenciát ad.</p></div>
+
+<div class="card"><h2>5. Frekvenciafüggő csillapítás</h2>
+<p>Az 1/2 rész 11. pontja a Rayleigh-modellt adta: \(\sigma_n=(\alpha+\beta\omega_n^2)/2\). Valódi tárgynál három veszteség van: a levegőbe sugárzás (főleg mély módusoknál), az anyag belső súrlódása (magasaknál) és a rögzítés. Egy gyakori mérnöki leírás a <b>veszteségi tényező</b> \(\eta\):</p>
+<p>\[\sigma_n=\frac{\eta\,\omega_n}{2},\qquad T_{60,n}=\frac{\ln1000}{\sigma_n}=\frac{13{,}8}{\eta\,\omega_n}.\]</p>
+<p><b>Honnan jön az \(\eta\)?</b> Definíciója az egy periódus alatt elveszett energia hányada: \(\eta=\Delta E/(2\pi E)=1/Q\). Egy módus kitérése \(e^{-\sigma t}\), energiája \(e^{-2\sigma t}\), egy periódus \(2\pi/\omega_d\) ideig tart, ezért</p>
+<p>\[\frac{\Delta E}{E}=1-e^{-4\pi\sigma/\omega_d}\approx\frac{4\pi\sigma}{\omega}\;\Rightarrow\;\eta\approx\frac{2\sigma}{\omega},\quad\sigma=\frac{\eta\omega}{2}\qquad(\sigma\ll\omega).\]</p>
+<p>A \(T_{60}\) azt jelenti, hogy az amplitúdó 60 dB-t, azaz 1000-szeresére csökken: \(e^{-\sigma T_{60}}=10^{-3}\), tehát \(T_{60}=\ln 1000/\sigma\). Pontosabb alak: \(\eta=(1-e^{-4\pi\sigma/\omega_d})/(2\pi)\). Komplex rugalmassági modulussal (\(E(1+i\eta)\), „szerkezeti csillapítás”) a pólus \(s=i\omega_0\sqrt{1+i\eta}\), amiből</p>
+<p>\[\sigma=\omega_0\sqrt{\tfrac{\sqrt{1+\eta^2}-1}{2}}\approx\tfrac{\eta\omega_0}{2},\qquad\omega_d=\omega_0\sqrt{\tfrac{\sqrt{1+\eta^2}+1}{2}}.\]</p>
+<p>Az \(\eta\) értékét az anyagból nem lehet elméletileg kiszámolni (belső súrlódás, légsugárzás és rögzítés együtt adja), hanem mérik: (1) <i>lecsengésből</i>: exponenciális illesztéssel \(\sigma_n\), majd \(\eta_n=2\sigma_n/\omega_n\); (2) <i>rezonanciacsúcs szélességéből</i>: \(\eta\approx\Delta f_{-3\,\mathrm{dB}}/f_n\); (3) <i>hiszterézishurokból</i>: \(\eta=\) hurok területe \(/(2\pi\cdot\) tárolt energia). A Rayleigh-modellel összevetve \(\eta_n=\alpha/\omega_n+\beta\omega_n\): mély módusoknál a tömegarányos (levegő), magasaknál a merevségarányos (anyag) tag dominál.</p>
+<p>Példa: \(\eta=10^{-3}\) (fémes tárgy), \(f=1000\) Hz: \(\sigma=3{,}14\) 1/s, \(T_{60}=2{,}2\) s. Nagyságrendileg tízszer nagyobb \(\eta\)-val (fa) 0,22 s. A fa ezért „tompa”, a fém „csengő”. A demóban egyszerűbb alakot használunk: \(\sigma_n=\sigma_1\,[1+b\,(r_n^2-1)]\), ahol \(r_n=f_n/f_1\); \(b=0\) azonos lecsengés minden módusnál, \(b=1\) tisztán \(\omega^2\)-es fékezés [20].</p></div>
+
+<div class="card"><h2>6. Az ütés: kalapács és kontaktidő</h2>
+<p>Az 1/2 részben az ütés ideális impulzus volt (minden módust egyformán gerjeszt). A valódi kalapács \(\tau\) ideig érintkezik, ezért az erőpulzus spektruma aluláteresztő: a módusok erősségét a \(g_n=1/\sqrt{1+(f_n/f_c)^2}\) szorzó csökkenti, ahol \(f_c\) nagyságrendileg \(1/\tau\). Puha filckalapácsnál hosszú a \(\tau\), kicsi az \(f_c\): csak a mély módusok szólnak. Kemény fa- vagy fémpálcánál rövid a \(\tau\), a magas módusok is megjelennek [3][12]. Az erősebb ütés gyengén rövidíti az érintkezést (Hertz-érintkezés, \(\tau\propto v^{-1/5}\)), ezért az erősebb hang világosabb is.</p>
+<h3>6.1 A kalapács anyaga, tömege, sebessége</h3>
+<p>A kalapács és a tárgy közti erőt gyakran hatványtörvénnyel írják: \(F=K\,\delta^{p}\), ahol \(\delta\) az összenyomódás, \(K\) a kontaktmerevség (az anyagtól és az alaktól függ), \(p\) a kitevő. Golyó–sík Hertz-érintkezésnél \(p=3/2\), filckalapácsnál mérések szerint 2,5–3,5 körüli [25][26][29]. Az energiából \(\tfrac12m_hv^2\approx K\delta_m^{p+1}/(p+1)\), vagyis \(\delta_m\propto(m_hv^2/K)^{1/(p+1)}\), és az érintkezési idő \(\tau\sim\delta_m/v\):</p>
+<p>\[\tau\;\propto\;\Big(\frac{m_h}{K}\Big)^{\frac1{p+1}}\,v^{-\frac{p-1}{p+1}}.\]</p>
+<p>Hertz-érintkezésnél (\(p=3/2\)) ez a fenti \(\tau\propto v^{-1/5}\), puha filcnél (\(p=3\)) már \(v^{-1/2}\): az erősebb ütés a filckalapácsnál sokkal jobban megrövidíti az érintkezést, ezért a hang erősebben világosodik (zongora: piano és forte közti különbség). Az erőpulzus alakját \(F(t)\approx F_m\sin^{\gamma}(\pi t/\tau)\)-val közelítjük, \(\gamma=2p/(p+1)\) (lineáris rugónál \(\gamma=1\), félszinusz). A pulzus spektruma aluláteresztő, ez adja a módusok súlyát: a kitérésben \(a_n\propto u_n(p)\,u_n(q)\,\hat F(f_n)/\omega_n\).</p>
+<div class="scroll"><table><tr><th>Kalapács (demó-gomb)</th><th>\(\tau_0\) [ms]</th><th>\(p\)</th><th>Mit várunk</th></tr>
+<tr><td>puha filc</td><td>3</td><td>3</td><td>csak a mély módusok szólnak, erős ütésnél világosodik</td></tr>
+<tr><td>kemény filc</td><td>1,5</td><td>2,5</td><td>zongorakalapács-szerű</td></tr>
+<tr><td>bőr</td><td>0,8</td><td>2</td><td>középső</td></tr>
+<tr><td>fa</td><td>0,4</td><td>1,5</td><td>xilofon-, marimba-szerű</td></tr>
+<tr><td>műanyag</td><td>0,25</td><td>1,5</td><td>világos, éles</td></tr>
+<tr><td>fém</td><td>0,1</td><td>1,5</td><td>majdnem ideális impulzus, harangszerű</td></tr></table></div>
+<p style="font-size:13px">A \(\tau_0\) az 1× tömegű, 1× sebességű ütés érintkezési ideje. Ezek a demó kezdőértékei, nagyságrendi becslések, nem mért anyagadatok.</p>
+<h3>6.2 Felület: érdesség</h3>
+<p>A valódi érintkezés nem sima: a felületi egyenetlenségek miatt az erő a sima pulzus körül ingadozik. Egyszerű statisztikai modell: \(F(t)=F_{\mathrm{sima}}(t)\,[1+\rho\,\xi(t)]\), ahol \(\xi\) egységnyi szórású, aluláteresztő (kb. 6 kHz) zaj, \(\rho\) az érdesség, és \(F\ge0\). Az összimpulzus változatlan. A zaj a sima pulzus vágásán túl is ad szélessávú, „sercegő” összetevőt a támadásban. Ez nem mikrokontaktus-szimuláció, csak a hallható hatás első közelítése.</p>
+<h3>6.3 Pengetés</h3>
+<p>Pengetésnél nincs erőpulzus, a tárgy a statikus lehajlásból indul: \(x_n(0)=u_n(p)/\omega_n^2\), \(\dot x_n(0)=0\). Húrnál ez \(\sin(n\pi p)/n^2\), a háromszög alakú lehajlás Fourier-sora. A pengető vagy az ujjbegy szélessége aluláteresztőként hat: \(1/(1+(f_n/f_c)^2)\), \(f_c\approx0{,}5/\tau_0\). A \(p=1/k\) helyen pengetett húrból minden \(k\)-adik harmonikus kimarad.</p>
+<h3>6.4 Lenyomás: lefogás és tompítás</h3>
+<p>Két különböző dolgot hívunk lenyomásnak.</p>
+<p><b>(a) Lefogás.</b> Az ujj a húr egy részét kizárja, a hangzó rész hossza \(1-x_f\) lesz, ezért \(f_1\to f_1/(1-x_f)\), a módusalakok pedig az ujj és a híd közti szakaszon élnek. A \(k\) félhangnyi fogás helye \(x_f=1-2^{-k/12}\) (12. fogás: \(x_f=1/2\); tiszta kvintnél \(1/(1-x_f)=3/2\), \(x_f=1/3\)). A gerjesztés és a hallgatás helyét a demóban a teljes húrhoz mérjük, ha az ujj mögé esik, a legközelebbi hangzó pontra kerül.</p>
+<p><b>(b) Tompítás.</b> Ha az \(x_d\) pontban egy \(c\) csillapítású elem (ujjbegy, filc, tenyér) fékezi a tárgyat, az \(n\)-edik módus egyenletébe \(-c\,u_n(x_d)\sum_k u_k(x_d)\dot x_k\) kerül. Gyenge kapcsolásnál (a módusok nem keverednek) csak a diagonális tag számít:</p>
+<p>\[\sigma_n=\sigma_{n0}+\kappa\,u_n(x_d)^2,\qquad\kappa=\frac{c}{2m}.\]</p>
+<p>Ahol a módusnak csomópontja van (\(u_n(x_d)=0\)), a fékezés nem hat rá. Következmények:</p>
+<ul>
+<li><b>Flageolet.</b> Húrnál \(x_d=L/k\): \(\sin(n\pi/k)=0\) pontosan akkor, ha \(k\mid n\), így csak az alaphang \(k\)-szorosának többszörösei élnek tovább. \(x_d=L/2\) az oktávot, \(L/3\) a tizenkettediket adja.</li>
+<li><b>Rúd.</b> A szabad–szabad rúd alaphangjának csomópontjai a végektől 22,4%-ra vannak. Itt megfogva az alaphang nem csillapodik (ezért támasztják a xilofon- és vibrafonlapokat ott), a közepén megfogva viszont elhal [19].</li>
+<li><b>Membrán.</b> A közepén csak a körszimmetrikus (\(m=0\)) módusoknak van kitérése, ezért a közép tompítása ezeket fékezi, a többit nem.</li>
+<li><b>Időzítés.</b> Ha a tompító csak \(t_d\) idő múlva ér a tárgyhoz, a már megszólalt hang lecseng (zongorafelfogó, tenyértompítás).</li></ul>
+<div class="box warn"><b>Korlát.</b> Ha \(\kappa\to\infty\), a pont mozdulatlan lesz, vagyis új csomó keletkezik, és a frekvenciák is megváltoznak. Ez már a lefogás (a). Az erős, de véges \(\kappa\) csak fékez, a frekvenciákat nem tolja el, a tömegterhelést is elhanyagoljuk.</div>
+<h3>6.5 Vonás: tapad–csúszik</h3>
+<p>A vonó a húrra \(F=-F_N\,\mu(v_{\mathrm{rel}})\,\mathrm{sgn}(v_{\mathrm{rel}})\) erőt gyakorol, ahol \(v_{\mathrm{rel}}=v_s-v_b\) a húr és a vonó relatív sebessége. Tapadáskor \(v_{\mathrm{rel}}=0\) és \(|F|\le\mu_sF_N\), csúszáskor \(\mu\) csökken a sebességgel. Hiperbolikus közelítéssel</p>
+<p>\[\mu(v)=\mu_d+\frac{\mu_s-\mu_d}{1+|v|/v_0}.\]</p>
+<p>A gyanta a \(\mu_s-\mu_d\) különbséget növeli. A modális modellben minden módus \(\ddot x_n+2\sigma_n\dot x_n+\omega_n^2x_n=u_n(p)F(t)\), a vonó pontján a sebesség \(v_s=\sum_nu_n(p)\dot x_n\). Mintánként a pontos (exponenciális) léptetésből \(v_s[k]=v_{\mathrm{szabad}}[k]+H\,F[k]\) adódik, ahol \(H=\sum_nu_n(p)^2b_n\) a pont mobilitása. Az \(F[k]\) egy skalár egyenlet megoldása: ha \(|v_b-v_{\mathrm{szabad}}|/H\le\mu_sF_N\), akkor tapad (\(F=(v_b-v_{\mathrm{szabad}})/H\)), különben csúszik, és a \(F=-\mathrm{sgn}(v_{\mathrm{rel}})F_N\mu(|v_{\mathrm{rel}}|)\) egyenletet felezéssel oldjuk meg [24][27].</p>
+<p>A kialakuló <b>Helmholtz-mozgásban</b> egyetlen éles sarok fut körbe a húron [28]. A vonó pontján a sebesség négyszög-, a kitérés fűrészfogszerű, a spektrum \(\sim1/n\) szerint esik, és ott szól kevés, ahol \(n\beta\) egész (\(\beta\) a vonó távolsága a hídtól, a hossz törtrésze). A Helmholtz-mozgás csak egy erősávban alakul ki [23]: \(F_{\max}\propto v_b/(\beta\,(\mu_s-\mu_d))\), kisebb erőnél karcos, felületi hangot kapunk, nagyobbnál reccsenőt. A demóban ezt kimértük (a hang harmonikus energiahányada alapján): \(\varphi_{\max}\approx0{,}034\,v_b/\beta\) és \(\varphi_{\min}\approx0{,}05\,v_b\), kétszeres sebességnél mindkét határ kétszeres. A számok a modell normálásától függenek, a skálázás Schellengé.</p>
+<h3>6.6 A kalapács kiszámítása: csatolt kalapács–tárgy modell</h3>
+<p>Eddig a pulzus előírt volt. Valójában az erő a kalapács és a tárgy közös mozgásából adódik. A kalapács (tömeg \(m_h\), helye \(y_h\)) a \(p\) pontban ér a tárgyhoz, az összenyomódás \(\delta=y_h-y(p)\), a kitevő \(p_e\):</p>
+<p>\[m_h\ddot y_h=-F,\quad F=K\max(0,\delta)^{p_e},\quad \ddot x_n+2\sigma_n\dot x_n+\omega_n^2x_n=u_n(p)F,\quad y(p)=\sum_nu_n(p)x_n.\]</p>
+<p>Egy mintalépésben (\(\Delta t\)) a módusok pontos léptetése állandó erőnél \(y=y_{\mathrm{szabad}}+H_xF\), ahol \(H_x=\sum_nu_n(p)^2b_{x,n}\), \(b_{x,n}=(1-c_{11,n})/\omega_n^2\). A kalapácsra \(y_h'=y_h+v_h\Delta t-\Delta t^2F/m_h\). Ezért \(\delta'=\delta_0-SF\), \(S=\Delta t^2/m_h+H_x\), \(\delta_0=y_h+v_h\Delta t-y_{\mathrm{szabad}}\), és az erő egyetlen skaláregyenletből jön:</p>
+<p>\[F=K\max(0,\delta_0-SF)^{p_e}.\]</p>
+<p>A bal oldal nő, a jobb csökken \(F\)-ben, ezért a gyök egyértelmű, felezéssel megkapjuk (ugyanaz a trükk, mint a vonásnál). Ha \(\delta_0\le0\), az érintkezés megszűnt (\(F=0\)), a kalapács szabadon repül. Az elpattanás és a második érintés magától adódik; a demó a kalapácsot az utolsó érintkezés után 30 ms-mal eltávolítja.</p>
+<p><b>A \(K\) kalibrálása.</b> Merev falra ütve a kontaktidő \(\tau=2B\,\delta_m/v_0\), \(\delta_m=\big((p_e+1)m_hv_0^2/(2K)\big)^{1/(p_e+1)}\), \(B=\int_0^1(1-z^{p_e+1})^{-1/2}dz\). A demóban a \(\tau_0\) csúszka (1× tömeg, 1× sebesség) ebből adja a \(K\)-t. A tárgy a \(p\) pontban az \(n\). módusra \(M_{\mathrm{eff},n}=m_n/u_n(p)^2\) effektív tömeggel nehezedik: ha \(m_h\ll M_{\mathrm{eff}}\), a fal-közelítés jó. Ha a kalapács nehezebb, vagy a tárgy a \(p\) pontban könnyű, a számolt \(\tau\) hosszabb, mert a tárgy engedik. Az előírt pulzus ezt nem tudja, a csatolt modell igen. A demó a számolt \(\tau\)-t és az erőpulzus spektrumát az utolsó lejátszásból rajzolja.</p>
+<h3>6.7 Lefogás tetszőleges pontban: módusok újraszámolása</h3>
+<p>A (a) pontbeli \(f_1/(1-x_f)\) csak húrra jó, és eldobja az ujj mögötti szakaszt. Általános, minden tárgyra érvényes eljárás: merev, pontszerű lefogás a \(d\) helyen, vagyis a kényszer \(y(d)=\sum_nu_n(d)x_n=0\). Ha a pontot egy \(k\) merevségű rugó tartja, a módusegyenlet \((\omega_n^2-\lambda)x_n=-k\,u_n(d)\,y(d)\), ebből \(1+k\sum_nu_n(d)^2/(\omega_n^2-\lambda)=0\). \(k\to\infty\) határesetben az új \(\tilde\omega^2=\lambda\) frekvenciák a</p>
+<p>\[\sum_n\frac{u_n(d)^2}{\omega_n^2-\tilde\omega^2}=0\]</p>
+<p>gyökei. A bal oldal \(\tilde\omega^2\)-ben szigorúan nő, ezért két szomszédos (nem csomóponti) módus közt pontosan egy gyök van: \(\omega_j\le\tilde\omega_j\le\omega_{j+1}\) (Rayleigh: a kényszer csak emel, de nem lép át a következő módusra). Az új módusalak \(\tilde u_j=\sum_nc_{jn}u_n\), \(c_{jn}\propto u_n(d)/(\omega_n^2-\tilde\omega_j^2)\), egységnyi normával, és \(\tilde u_j(d)=0\) magától teljesül. Azok a módusok, amelyeknek \(d\)-ben csomójuk van, változatlanok. A csillapítás \(\tilde\sigma_j=\sum_nc_{jn}^2\sigma_n\), a gerjesztés \(\tilde a_j=\tilde u_j(p)\,\tilde u_j(q)\).</p>
+<p><b>Ellenőrzés.</b> Húr közepén lefogva a gyökök a \(2f_1,2f_1,4f_1,4f_1,\dots\) sort adják: két félhosszú húr, oktávval magasabban, kétszeres multiplicitással. \(d=L/3\)-nál a \(3f_1\) többszörösei maradnak, a többi felemelkedik. A szabad–szabad rúdnál a \(d=22{,}4\%\)-os csomóban az alaphang gyakorlatilag nem változik (ezért támasztják ott), a közepén a páros módusok maradnak, a páratlanok feljebb csúsznak. A húrnál a két szakasz mindegyike szól (a nyereg felőli rész is), az ujjnál nincs rögzített \(x_f\)-rövidítés. A rúdra és a membránra nincs zárt rövidítési képlet, csak ez az eljárás. Korlát: a demó legfeljebb 10 kHz-ig, rúdnál 8, membránnál 10 módust tart meg, ezért a felső gyökök pontatlanok.</p>
+<h3>6.8 A lefogás ereje</h3>
+<p>Az ujj nem végtelen merev: a lefogás merevségét a nyomóerő \(F_f\) szabja meg. Az ujjbegy (vagy a bund) és a tárgy érintkezése Hertz-féle, \(F=K_f\delta^{3/2}\), ezért a pont érintkezési merevsége \(k_s=\mathrm{d}F/\mathrm{d}\delta=\tfrac32K_f^{2/3}F_f^{1/3}\) [N/m]. Ez a 6.7 egyenletbe a \(\tfrac1k\) taggal lép be: \(\sum_nu_n(d)^2/(\omega_n^2-\tilde\omega^2)+1/\tilde k=0\), ahol \(\tilde k=k_s/m_n\) [1/s²] (a módusalakok \(u_n\) egységnyi csúcsúak, \(m_n\) a módustömeg). \(\tilde k\to\infty\) a merev lefogás. A módus akkor tekinthető rögzítettnek, ha \(\omega_n^2\ll\tilde k\,u_n(d)^2\); a határfrekvencia \(f_c\approx\tfrac1{2\pi}\sqrt{\tilde k}\). Gyenge nyomásnál ezért a magas módusok „átcsúsznak” az ujjon (tompa, érdes hang), erős nyomásnál élesen megszólal a lefogott hang. Az ujjbegy puha (\(K_f\approx3\cdot10^4\) N/m\(^{3/2}\)), a fém bund merev (acél–acél, \(K=\tfrac43E^*\sqrt R\approx3\cdot10^9\)), ezért bundos hangszernél \(f_c\) messze a hallható sáv fölött van. Az erő a \(\tfrac13\)-os hatványon szerepel: tízszeres erő csak 2,15-szörös merevség. A demóban a nyomóerő a „Lefogás ereje” csúszka (0,01–100 N), a \(K_f/m_n\) arányt a Demó fül kalkulátora adja át.</p>
+<h3>6.9 Az összes változó: honnan számoljuk</h3>
+<div class="scroll"><table><tr><th>Tárgy / folyamat</th><th>Változók (SI)</th><th>Számítás</th></tr>
+<tr><td>Húr</td><td>\(L\) [m], \(d\) [m], \(\rho\) [kg/m³], \(E\) [Pa], \(T\) [N]</td><td>\(S=\tfrac{\pi d^2}4\), \(\mu=\rho S\) [kg/m], \(I=\tfrac{\pi d^4}{64}\), \(f_1=\tfrac1{2L}\sqrt{T/\mu}\), \(B=\tfrac{\pi^3Ed^4}{64TL^2}\), \(m=\mu L\), \(m_n=\tfrac{\mu L}2\), \(Z_0=\sqrt{T\mu}\) [kg/s]</td></tr>
+<tr><td>Rúd</td><td>\(L,b,h\) [m], \(\rho,E\)</td><td>\(A=bh\), \(I=\tfrac{bh^3}{12}\), \(f_1=\tfrac{4{,}730^2}{2\pi L^2}\sqrt{\tfrac{EI}{\rho A}}\), \(m=\rho AL\)</td></tr>
+<tr><td>Membrán</td><td>\(R,h\) [m], \(\rho\), \(T_s\) [N/m]</td><td>felületi sűrűség \(\sigma_s=\rho h\) [kg/m²], \(f_{01}=\tfrac{2{,}405}{2\pi R}\sqrt{T_s/\sigma_s}\), \(m=\sigma_s\pi R^2\)</td></tr>
+<tr><td>Lemez</td><td>\(R,h,\rho,E,\nu\)</td><td>\(D=\tfrac{Eh^3}{12(1-\nu^2)}\) [N·m], \(\sigma_s=\rho h\), \(f=\tfrac{\lambda^2}{2\pi R^2}\sqrt{D/\sigma_s}\), \(\lambda^2\approx5{,}25\) (szabad peremű, (2,0) módus)</td></tr>
+<tr><td>Csillapítás</td><td>\(\eta\) (= 1/Q)</td><td>\(\sigma_n=\tfrac{\eta\omega_n}2\), \(T_{60}=\tfrac{6{,}908}{\sigma_n}\)</td></tr>
+<tr><td>Módus-tömeg</td><td>\(m_n\), \(u_n(p)\)</td><td>effektív tömeg a \(p\) pontban \(M_{\mathrm{eff},n}=m_n/u_n(p)^2\)</td></tr>
+<tr><td>Kalapács</td><td>\(m_h\) [kg], \(v_h\) [m/s], \(R_h\) [m], \(E_h,\nu_h\); filcnél \(K,p_e\)</td><td>\(E^*=\big[\tfrac{1-\nu_h^2}{E_h}+\tfrac{1-\nu^2}{E}\big]^{-1}\), \(K=\tfrac43E^*\sqrt{R_h}\) (\(p_e=\tfrac32\)), \(\delta_m=\big(\tfrac{(p_e+1)m_hv_h^2}{2K}\big)^{1/(p_e+1)}\), \(F_{\max}=K\delta_m^{p_e}\), \(\tau=\tfrac{2B\delta_m}{v_h}\)</td></tr>
+<tr><td>Pengetés</td><td>\(F_p\) [N], \(p\)</td><td>statikus lehajlás húrnál \(y_0=\tfrac{F_p\,p(1-p)L}{T}\), \(x_n(0)=\tfrac{u_n(p)F_p}{m_n\omega_n^2}\)</td></tr>
+<tr><td>Vonás</td><td>\(F_N\) [N], \(v_b\) [m/s], \(\beta\), \(\mu_s,\mu_d\)</td><td>Schelleng: \(F_{N,\max}=\tfrac{2Z_0v_b}{\beta(\mu_s-\mu_d)}\)</td></tr>
+<tr><td>Lefogás</td><td>\(F_f\) [N], \(K_f\), \(d\)</td><td>\(k_s=\tfrac32K_f^{2/3}F_f^{1/3}\), \(\tilde k=k_s/m_n\), \(f_c\approx\tfrac1{2\pi}\sqrt{\tilde k}\); fogás helye \(x_f=1-2^{-k/12}\)</td></tr>
+<tr><td>Tompító</td><td>\(c\) [N·s/m], \(x_d\)</td><td>\(\kappa=\tfrac c{2m_n}\), \(\sigma_n\to\sigma_n+\kappa u_n(x_d)^2\)</td></tr></table></div>
+<p style="font-size:14px">A <b>Demó</b> fül alján a kalkulátor ezeket a képleteket valódi anyagadatokból és méretekből számolja ki, és egy gombbal átadja a Játékmódoknak.</p>
+<h3>6.10 Teljes levezetés</h3>
+<details open><summary><b>A) Módusfelbontás: húr, rúd, membrán, lemez</b></summary>
+<p><b>Húr.</b> \(\mu y_{tt}+2\mu\sigma_0y_t-Ty_{xx}=\delta(x-p)F(t)\), \(y(0)=y(L)=0\). A \(y=\sum_nu_n(x)x_n(t)\) behelyettesítése után szorzunk \(u_m\)-mel és integrálunk \([0,L]\)-n. A \(u_n=\sin(n\pi x/L)\) megoldja a \(-u_n^{(2)}=k_n^2u_n\) egyenletet (\(k_n=n\pi/L\)), és \(\int_0^Lu_nu_m\,dx=\tfrac L2\delta_{nm}\), ezért \(\tfrac{\mu L}2(\ddot x_n+2\sigma_n\dot x_n+\omega_n^2x_n)=u_n(p)F\), \(\omega_n=k_n\sqrt{T/\mu}\). Tehát \(m_n=\mu L/2\), \(f_n=\tfrac n{2L}\sqrt{T/\mu}\). A demóban \(m_n=1\) normálás van, az erőt \(m_n\)-hez mérjük.</p>
+<p><b>Rúd</b> (Euler–Bernoulli): \(\rho Ay_{tt}+EIy_{xxxx}=0\). \(y=X(x)e^{i\omega t}\) esetén \(X^{(4)}=\beta^4X\), \(\beta^4=\rho A\omega^2/EI\), vagyis \(\omega=\beta^2\sqrt{EI/\rho A}\). Szabad–szabad végeknél \(X^{(2)}=X^{(3)}=0\), ebből \(\cos\beta L\cosh\beta L=1\), \(\beta L=4{,}730;7{,}853;10{,}996\dots\). <b>Membrán</b>: \(\sigma_sw_{tt}=T_s\nabla^2w\), polárkoordinátákban \(w=J_m(kr)\cos m\theta\,e^{i\omega t}\), a peremen \(J_m(kR)=0\), azaz \(k=j_{mn}/R\), \(\omega=k\sqrt{T_s/\sigma_s}\). <b>Lemez</b>: \(D\nabla^4w=-\sigma_sw_{tt}\), \(D=\tfrac{Eh^3}{12(1-\nu^2)}\), \(\omega=\tfrac{\lambda^2}{R^2}\sqrt{D/\sigma_s}\), ahol \(\lambda^2\) a peremfeltételből jön.</p></details>
+<details><summary><b>B) Pontos léptetés mintánként</b></summary>
+<p>Egy módus állapota \(\mathbf s=(x,\dot x)^T\): \(\dot{\mathbf s}=\mathbf A\mathbf s+\mathbf bF\), \(\mathbf A=\begin{pmatrix}0&1\\-\omega^2&-2\sigma\end{pmatrix}\), \(\mathbf b=(0,u)^T\). Állandó \(F\)-nél \(\mathbf s(\Delta t)=e^{\mathbf A\Delta t}\mathbf s_0+\mathbf A^{-1}(e^{\mathbf A\Delta t}-\mathbf I)\mathbf bF\), ahol \(\theta=\omega_d\Delta t\), \(\omega_d=\sqrt{\omega^2-\sigma^2}\), és</p>
+<p>\[e^{\mathbf A\Delta t}=e^{-\sigma\Delta t}\begin{pmatrix}\cos\theta+\tfrac\sigma{\omega_d}\sin\theta&\tfrac{\sin\theta}{\omega_d}\\-\tfrac{\omega^2}{\omega_d}\sin\theta&\cos\theta-\tfrac\sigma{\omega_d}\sin\theta\end{pmatrix}=\begin{pmatrix}c_{11}&c_{12}\\c_{21}&c_{22}\end{pmatrix}.\]</p>
+<p>A partikuláris megoldás a statikus kitérés \(x_p=uF/\omega^2\), így \(x(\Delta t)=c_{11}x_0+c_{12}v_0+b_xuF\), \(b_x=(1-c_{11})/\omega^2\), és \(v(\Delta t)=c_{21}x_0+c_{22}v_0+b_vuF\), \(b_v=-c_{21}/\omega^2=e^{-\sigma\Delta t}\sin\theta/\omega_d\). Nincs numerikus csillapítás, a hiba csak abból jön, hogy \(F\) a lépésben nem állandó.</p></details>
+<details><summary><b>C) Kalapács: a skaláregyenlet egyértelmű megoldása</b></summary>
+<p>Az \(F\) behelyettesítése a tárgy- és kalapácslépésbe: \(h(F)=F-K\,(\delta_0-SF)_+^{p_e}=0\), \(S=\Delta t^2/m_h+H_x>0\). Itt \(h'(F)=1+p_eKS(\delta_0-SF)_+^{p_e-1}>0\), \(h(0)\le0\), \(h(K\delta_0^{p_e})\ge0\), tehát a gyök egyetlen, és a felezés mindig megtalálja. A kalapács visszapattanási sebessége \(v_h^{\mathrm{vég}}=v_h-J/m_h\), \(J=\sum F\Delta t\), a restitúciós tényező \(e=-v_h^{\mathrm{vég}}/v_h=J/(m_hv_h)-1\).</p></details>
+<details><summary><b>D) Kontaktidő és Hertz-merevség</b></summary>
+<p>Merev falra az energia megmarad: \(\tfrac12m\dot\delta^2+\tfrac K{q}\delta^{q}=\tfrac12mv_0^2\), \(q=p_e+1\). Ebből \(\dot\delta=v_0\sqrt{1-(\delta/\delta_m)^q}\), \(\delta_m=\big(\tfrac{qmv_0^2}{2K}\big)^{1/q}\). A kontaktidő \(\tau=2\int_0^{\delta_m}\tfrac{d\delta}{\dot\delta}=\tfrac{2\delta_m}{v_0}B(p_e)\), \(B=\int_0^1\tfrac{dz}{\sqrt{1-z^q}}=\tfrac1qB_\beta\!\big(\tfrac1q,\tfrac12\big)=\tfrac{\sqrt\pi}{q}\tfrac{\Gamma(1/q)}{\Gamma(1/q+1/2)}\). Ebből \(\tau\propto m^{1/q}v_0^{2/q-1}\), vagyis \(v_0^{-(p_e-1)/(p_e+1)}\). Visszafelé a \(K\) a megadott \(\tau_w\)-ből: \(\delta_m=\tau_wv_0/(2B)\), \(K=\tfrac{q\,m\,v_0^2}{2\delta_m^q}\). Golyó–sík esetén a Hertz-nyomáseloszlás \(p(r)=p_0\sqrt{1-r^2/a^2}\), \(a^2=R\delta\) integráljából \(F=\tfrac43E^*\sqrt R\,\delta^{3/2}\).</p></details>
+<details><summary><b>E) Lefogás véges erővel: szekuláris egyenlet</b></summary>
+<p>A pontot a \(k_s\) rugó tartja, a módusegyenlet (\(m_n=1\) normálással): \(\ddot x_n+\omega_n^2x_n=-\tilde k\,u_n(d)\,y(d)\), \(\tilde k=k_s/m_n\), \(y(d)=\sum u_nx_n\). Harmonikus megoldásnál (\(\lambda=\omega^2\)): \((\omega_n^2-\lambda)x_n=-\tilde ku_n(d)y_d\), ezt \(u_n\)-nel szorozva és összegezve \(1+\tilde k\sum_nu_n(d)^2/(\omega_n^2-\lambda)=0\), vagyis \(g(\lambda)=\sum_n\tfrac{u_n(d)^2}{\omega_n^2-\lambda}+\tfrac1{\tilde k}=0\). A \(g'(\lambda)=\sum u_n^2/(\omega_n^2-\lambda)^2>0\), és a pólusok közt \(g\) \(-\infty\)-ből \(+\infty\)-be megy, így két szomszédos módus közt egyetlen gyök van. Az első módus alatt \(g>1/\tilde k>0\), nincs gyök. Az utolsó módus fölött véges \(\tilde k\)-nál még egy gyök van (az ujj saját rezgése), \(\tilde k\to\infty\)-nél ez a végtelenbe kerül. A sajátvektor \(x_n\propto u_n(d)/(\omega_n^2-\lambda_j)\), egységnyire normálva. Mivel az \(\mathrm{diag}(\omega_n^2)+\tilde k\,\mathbf u_d\mathbf u_d^T\) mátrix szimmetrikus, az új módusok ortonormáltak, így a modális szintézis változatlanul használható: \(\tilde a_j=\tilde u_j(p)\tilde u_j(q)\).</p></details>
+<details><summary><b>F) Az ujj Hertz-merevsége és a határfrekvencia</b></summary>
+<p>\(F=K_f\delta^{3/2}\Rightarrow k_s=dF/d\delta=\tfrac32K_f\delta^{1/2}=\tfrac32K_f^{2/3}F^{1/3}\) (mert \(\delta=(F/K_f)^{2/3}\)). A \(\tilde k\) fölött a lefogás lágy: \(f_c\approx\tfrac1{2\pi}\sqrt{\tilde k}\), ahol a \(\omega_n^2\approx\tilde ku_n(d)^2\) feltétel már nem teljesül.</p></details>
+<table><tr><th>Vezérlő</th><th>Fizikai mennyiség</th></tr>
+<tr><td>keménység \(\tau_0\), nemlinearitás \(p\), tömeg, sebesség</td><td>\(\tau\) a 6.1 képlet szerint, pulzusalak \(\gamma=2p/(p+1)\)</td></tr>
+<tr><td>felület érdessége</td><td>\(\rho\) (6.2)</td></tr>
+<tr><td>lefogás</td><td>\(x_f\), \(f_1\to f_1/(1-x_f)\)</td></tr>
+<tr><td>tompító helye, erőssége, időpontja</td><td>\(x_d\), \(\kappa\), \(t_d\)</td></tr>
+<tr><td>vonóerő \(\varphi\), vonósebesség, gyanta, felfutás</td><td>\(F_N\) (skálázva), \(v_b\), \(\mu_s-\mu_d\), a vonóerő növekedési ideje</td></tr></table>
+<p style="font-size:14px">A beállítások kipróbálhatók a <b>Játékmódok</b> fülön.</p></div>
+
+<div class="card"><h2>7. Honnan jönnek a számok?</h2>
+<div class="scroll"><table><tr><th>Mód</th><th>Mit ad</th><th>Mikor jó</th></tr>
+<tr><td>Zárt képlet</td><td>\(f_n\), \(u_n\) egyszerű alakra (húr, rúd, kör membrán)</td><td>gyors, paraméterezhető (méret, anyag), de kevés az alak</td></tr>
+<tr><td>Végeselem (FEM)</td><td>\(\mathbf K\mathbf u=\omega^2\mathbf M\mathbf u\) nagy hálóra: tetszőleges alak [5]</td><td>összetett tárgy (palack, tál), a csillapítást külön kell megadni</td></tr>
+<tr><td>Mérés</td><td>ütés + mikrofon: spektrumcsúcsok → \(f_n\), exponenciális illesztés → \(\sigma_n\), amplitúdók → \(a_n\) [3][4]</td><td>valódi tárgy hangja, csillapítással együtt</td></tr></table></div>
+<p>Valós időben a költség módusonként kb. 4 szorzás mintánként. A halk (−60 dB alatti), gyorsan elhaló módusokat és a Nyquist fölöttieket érdemes kihagyni. Az eredmény mindig ugyanaz a három lista, bárhonnan is jött.</p></div>
+
+<div class="card"><h2>8. Összefoglaló recept és a modell határai</h2>
+<ol><li>Válaszd ki az alakot, és vedd a \(\omega_n\), \(u_n(x)\) értékeit (képlet, FEM vagy mérés).</li><li>Add meg a csillapítást: \(\sigma_n\) módusonként (\(\eta\), Rayleigh vagy mérés).</li><li>Válaszd az ütés (\(p\)) és a hallgatás (\(q\)) helyét: \(a_n=u_n(p)u_n(q)/m_n\).</li><li>Alakítsd a gerjesztéssel: kalapácsnál \(a_n\cdot\hat F(f_n)\) (a pulzus spektruma), pengetésnél \(1/\omega_n^2\)-es kezdőlehajlás, vonásnál időtartománybeli súrlódás (6.5).</li><li>Ha lenyomsz: lefogásnál \(f_1\to f_1/(1-x_f)\), tompításnál \(\sigma_n\to\sigma_n+\kappa\,u_n(x_d)^2\) (6.4).</li><li>Futtasd a két pólusú rezgők bankját (1/2 rész, 7.3).</li></ol>
+<div class="box"><b>Mi hiányzik?</b> A modell lineáris és időben állandó. Nem tud gongfelfutást (a nemlineáris energiaátadás a módusok között), a húr feszülésváltozását erős pengetésnél, a hangszertest és a húr kapcsolódását. A vonást csak egyetlen ponton, szélesség nélküli vonóval modelleztük (nincs vonószőr-rugalmasság, torziós hullám), a kalapácsnál nincs visszapattanás (második érintés) és filchiszterézis [26], a tompító nem terhel tömeggel. Ezekhez nemlineáris vagy kapcsolt modell kell [15].</div></div>
+</section>
+
+<section id="p-demo"><div class="card"><h2>Demó: húr, rúd, membrán</h2>
+<div class="intuition"><div class="intuition-title">🎯 Mit csinálj?</div>Válts tárgyat, és hallgasd meg ugyanazt az alaphangot. Húrnál állítsd az ütés helyét \(p=0{,}25\)-re (a 4. és 8. harmonikus kiesik), és növeld a \(B\)-t. Membránnál az ütés helyét tedd 0-ra: csak a körszimmetrikus módusok maradnak. A rajz a módusok szintjét mutatja (dB, a legerősebbhez képest).</div>
+<label style="font-size:14px">Tárgy: <select id="ob"><option value="s">Húr (merev)</option><option value="b">Szabad–szabad rúd</option><option value="m">Kör membrán</option></select></label>
+<div class="ctl"><label>Alapfrekvencia</label><input type="range" id="of" min="80" max="1000" value="220" data-u=" Hz"><output></output></div>
+<div class="ctl"><label>T60 az alaphangon</label><input type="range" id="ot" min="0.2" max="6" step="0.1" value="2" data-u=" s"><output></output></div>
+<div class="ctl"><label>Magas módusok féke (b)</label><input type="range" id="oq" min="0" max="100" value="20" data-u=" %"><output></output></div>
+<div class="ctl"><label>Kalapács vágófrekvenciája</label><input type="range" id="oc" min="300" max="12000" step="100" value="6000" data-u=" Hz"><output></output></div>
+<div class="ctl"><label>Ütés helye (0–100)</label><input type="range" id="op" min="0" max="100" value="33"><output></output></div>
+<div class="ctl"><label>Merevség B (húr, ×10⁻⁴)</label><input type="range" id="oB" min="0" max="40" value="4"><output></output></div>
+<button class="btn" id="go">🔔 Ütés</button>
+<div class="box" id="info" aria-live="polite" style="font-family:'Courier New',monospace;font-size:13px;margin-top:8px"></div>
+<canvas id="cv"></canvas>
+<p style="font-size:13px">Egyszerűsítés: a membránnál az ütés és a hallgatás ugyanazon a sugáron, azonos szögben van; a módus-tömeget a \(J_{m+1}(j_{mn})^2\) arányában vettük. A rúdnál az ütés helye 0 (vég) és 50 (közép) között mozog, a húrnál a hossz 2%–50%-a.</p></div><div class="card" id="phys"><h2>Fizikai bemenetek → minden változó</h2><p style="font-size:14px">Állítsd be az anyagot és a méreteket (a csúszkák jelentése tárgyfüggő: húrnál L hossz, d átmérő; rúdnál L, h vastagság, b szélesség; membránnál és lemeznél L a sugár, d a vastagság).</p></div></section>
+
+<section id="p-play"><div class="card"><h2>Demó 2: lenyomás, vonás, kalapács</h2></div></section>
+
+<section id="p-sum"><div class="card"><h2>Összefoglaló: minden rész hanggal, ábrával, pontos névvel és számítással</h2><p style="font-size:14px">Minden blokk: magyar és angol név, képlet, végigszámolt példa, a módusok szintje (dB a legerősebbhez képest) és egy hallgatható minta. A számok a példaértékekből élőben számolódnak.</p></div><div id="sumbox"></div></section>
+<section id="p-qty"><div class="card"><h2>Minden fizikai mennyiség: név, mértékegység, kiszámítás</h2><p style="font-size:14px"><span style="background:var(--yel);border:2px dashed var(--ink);padding:1px 8px;border-radius:8px">sárga = bemenet (írd át)</span> → <b>kék = kiszámolt érték</b>. Minden számítás SI-egységben fut, és élőben frissül, ha egy bemenetet átírsz. A mértékegység-oszlop az egységet a nyers SI-alapokban is megadja.</p></div><div id="qtybox"></div></section>
+<section id="p-code"><div class="card"><h2>Kód 4: húr modális bank gen~-ben</h2>
+<p>Az 1/2 rész 3. kódjának általánosítása: 16 módus, merevség, frekvenciafüggő lecsengés, kalapács és ütés helye. A <code>codebox</code>-ba másold, a bemenet <code>[click~]</code>.</p>
+<pre><code>// in1: ütés (click~)   out1: hang
+Param f1(220, min=50, max=1000);     // alapfrekvencia [Hz]
+Param B(0.0004, min=0, max=0.004);   // merevség (inharmonicitás)
+Param T60(2, min=0.1, max=6);        // az alaphang lecsengése [s]
+Param bt(0.2, min=0, max=1);         // magas módusok extra fékje
+Param p(0.2, min=0.02, max=0.5);     // ütés helye (L törtrésze)
+Param fc(6000, min=300, max=12000);  // kalapács vágófrekvenciája [Hz]
+Data ya(16), yb(16);                 // módusonkénti állapot
+fs = samplerate;  s1 = log(1000)/T60;  trig = (in1 &gt; 0.5);  out = 0;
+for (n = 1; n &lt;= 16; n += 1) {
+  f = n * f1 * sqrt(1 + B*n*n);
+  if (f &lt; 0.45*fs) {
+    r  = f/f1;
+    s  = s1*(1 + bt*(r*r - 1));      // σ_n
+    rr = exp(-s/fs);  th = TWOPI*f/fs;
+    a  = sin(n*pi*p) * sin(n*pi*p) / sqrt(1 + f*f/(fc*fc));
+    g  = a * sin(th) / (TWOPI*f);    // ω_d ≈ ω (ζ kicsi)
+    v  = trig*g + 2*rr*cos(th)*peek(ya, n-1) - rr*rr*peek(yb, n-1);
+    poke(yb, peek(ya, n-1), n-1);  poke(ya, v, n-1);
+    out += v;
+  }
+}
+out1 = out * 20;</code></pre>
+<div class="k">✅ <b>Ellenőrzés:</b> B = 0-nál a spektrum harmonikus sor (220, 440, 660 Hz…). p = 0,25-nél a 4. és 8. csúcs eltűnik. A B növelésével a magas csúcsok felfelé csúsznak.</div><details class="card" style="margin:12px 0 0;box-shadow:none"><summary><b>Levezetés az elméletből, sorról sorra</b></summary>
+<p><b>1. Egy módus válasza az ütésre.</b> A modális egyenlet \(m_n=1\) normálással \(\ddot x_n+2\sigma_n\dot x_n+\omega_n^2x_n=u_n(p)F(t)\). Az ütés \(F=\delta(t)\) impulzus, ezért \(x_n(0)=0\), \(\dot x_n(0^+)=u_n(p)\), és a megoldás \(x_n=\dfrac{u_n(p)}{\omega_{d,n}}e^{-\sigma_nt}\sin\omega_{d,n}t\). A kimenet \(y=\sum u_n(q)x_n\), így \(a_n=u_n(p)\,u_n(q)\). Húrra \(u_n=\sin n\pi x\), a hallgatás helye az ütés helye (\(q=p\)): <code>a = sin(n*pi*p)*sin(n*pi*p)</code>.</p>
+<p><b>2. Frekvencia.</b> A merev húr \(f_n=nf_1\sqrt{1+Bn^2}\) (2. pont): <code>f = n*f1*sqrt(1+B*n*n)</code>.</p>
+<p><b>3. Csillapítás.</b> \(T_{60}\) definíciója \(e^{-\sigma_1T_{60}}=10^{-3}\), tehát \(\sigma_1=\ln1000/T_{60}\): <code>s1 = log(1000)/T60</code>. A frekvenciafüggést a demó alakja adja, \(\sigma_n=\sigma_1[1+b(r_n^2-1)]\), \(r_n=f_n/f_1\): <code>s = s1*(1+bt*(r*r-1))</code>.</p>
+<p><b>4. Kalapács.</b> A kontaktidő alulátereszt: \(g_n=1/\sqrt{1+(f_n/f_c)^2}\), ezért az \(a\) osztva <code>sqrt(1+f*f/(fc*fc))</code>-val. Az amplitúdó \(a/\omega_d\), ezért <code>g = a*sin(th)/(TWOPI*f)</code>, ahol \(\omega_d\approx\omega=2\pi f\) (kis csillapításnál).</p>
+<p><b>5. Mintánkénti rekurzió.</b> Az \(y[k]=A\,r^k\sin((k+1)\theta)\) minta, \(r=e^{-\sigma\Delta t}\), \(\theta=\omega_d\Delta t\), két pólusa \(re^{\pm i\theta}\), vagyis karakterisztikus egyenlete \(z^2-2r\cos\theta\,z+r^2=0\). Ebből \(y[k]=2r\cos\theta\,y[k-1]-r^2y[k-2]\), az első minta \(y[0]=A\sin\theta\) (impulzus). Az \(A=a/\omega_d\) miatt a bemeneti szorzó <code>g = a*sin(th)/(2πf)</code>, a rekurzió <code>v = trig*g + 2*rr*cos(th)*y1 - rr*rr*y2</code>.</p>
+<p><b>6. Védelem és skálázás.</b> A Nyquist fölötti módust kihagyjuk: <code>if (f &lt; 0.45*fs)</code> (a 0,45 tartalék az aliasing ellen). A kimenet a módusok összege, <code>out1 = out*20</code> csak hangerő.</p></details></div>
+<div class="card"><h2>Kód 5: rúd és membrán frekvenciái</h2>
+<p>A fenti kódban csak az <code>f = …</code> sor és az erősség változik. <b>Szabad–szabad rúd</b> (a <code>for</code> hurok az <code>f</code> sorától):</p>
+<pre><code>bn = (n &lt; 3) ? ((n &lt; 2) ? 4.7300 : 7.8532) : (n + 0.5)*pi;
+f  = f1 * (bn/4.7300) * (bn/4.7300);</code></pre>
+<p><b>Kör membrán</b>: a Bessel-zérushelyeket egy <code>Data</code>-ba töltjük be az indításkor, a módusok sorrendje (0,1), (1,1), (2,1), (0,2), (3,1), (1,2), (4,1), (2,2), (0,3), (5,1):</p>
+<pre><code>Data jz(10);
+if (elapsed == 0) { poke(jz,2.4048,0); poke(jz,3.8317,1); poke(jz,5.1356,2); poke(jz,5.5201,3); poke(jz,6.3802,4);
+                    poke(jz,7.0156,5); poke(jz,7.5883,6); poke(jz,8.4172,7); poke(jz,8.6537,8); poke(jz,8.7715,9); }
+f = f1 * peek(jz, n-1) / 2.4048;</code></pre>
+<div class="box warn">A membrán erősségéhez kell a \(J_m\) Bessel-függvény, amit a GenExpr nem ismer, ezért sorfejtéssel egy saját függvényt írunk (a <code>jb</code> függvény a bank elé kerül), és a módusok rendjét (\(m\) értékeit) egy másik <code>Data</code>-ban tároljuk. Az erősség: \(a_n=(J_m(j_{mn}p)/J_{m+1}(j_{mn}))^2\), ahol \(p\in[0;1]\) az ütés sugara a peremhez képest.
+<pre><code>Data jm(10);
+if (elapsed == 0) { poke(jm,0,0); poke(jm,1,1); poke(jm,2,2); poke(jm,0,3); poke(jm,3,4);
+ poke(jm,1,5); poke(jm,4,6); poke(jm,2,7); poke(jm,0,8); poke(jm,5,9); }
+jb(m, x) {   // Bessel-függvény sorfejtéssel
+ t = pow(0.5*x, m);
+ for (i = 2; i &lt;= m; i += 1) { t = t/i; }   // (x/2)^m / m!
+ s = 0;
+ for (k = 0; k &lt; 30; k += 1) { s += t; t = -t*0.25*x*x/((k+1)*(k+1+m)); }
+ return s;
+}
+j = peek(jz, n-1); m = peek(jm, n-1); r = jb(m, j*p) / jb(m+1, j);
+a = r*r / sqrt(1 + f*f/(fc*fc));   // a, a kalapáccsal együtt</code></pre></div><details class="card" style="margin:12px 0 0;box-shadow:none"><summary><b>Levezetés az elméletből, sorról sorra</b></summary>
+<p><b>Rúd.</b> Az Euler–Bernoulli-egyenlet \(\rho Ay_{tt}+EIy_{xxxx}=0\) harmonikus megoldására \(X^{(4)}=\beta^4X\), \(\omega=\beta^2\sqrt{EI/\rho A}\). Szabad végekre \(\cos\beta L\cosh\beta L=1\). Nagy \(\beta L\)-re \(\cosh\beta L\) hatalmas, ezért \(\cos\beta L=1/\cosh\beta L\to0\), vagyis \(\beta L\approx(n+\tfrac12)\pi\) (n=3-tól a kód ezt használja, az első kettő a pontos gyök: 4,7300 és 7,8532). Mivel \(\omega\propto(\beta L)^2\), \(f_n/f_1=(\beta_nL/4{,}730)^2\): <code>f = f1*(bn/4.7300)*(bn/4.7300)</code>. A \(\beta_n L\)-t a <code>bn = (n&lt;3) ? ... : (n+0.5)*pi</code> sor adja.</p>
+<p><b>Membrán.</b> A \(\sigma_sw_{tt}=T_s\nabla^2w\) egyenlet megoldása \(w=J_m(kr)\cos m\theta\,e^{i\omega t}\). A peremen \(J_m(kR)=0\), tehát \(k=j_{mn}/R\), és \(\omega=k\sqrt{T_s/\sigma_s}\). Így \(f_{mn}/f_{01}=j_{mn}/j_{01}\): <code>f = f1*peek(jz,n-1)/2.4048</code>. A \(j_{mn}\) értékek a (0,1), (1,1), (2,1), (0,2) … sorrendben, nagyság szerint vannak a <code>Data jz</code>-ben; a GenExpr-ben nincs Bessel-függvény, ezért töltjük be a zérushelyeket az <code>elapsed == 0</code> feltétellel, egyszer.</p>
+<p><b>Erősség.</b> A módusalak \(u_{mn}=J_m(j_{mn}r/R)\cos m\theta\), a módustömeg \(\int_0^RJ_m^2(j_{mn}r/R)\,r\,dr=\tfrac{R^2}2J_{m+1}(j_{mn})^2\)-tel arányos, ezért \(a_n\propto J_m(j_{mn}p)^2/J_{m+1}(j_{mn})^2\). A GenExpr-ben nincs Bessel-függvény, ezért a sorfejtést használjuk: \(J_m(x)=\sum_k\frac{(-1)^k}{k!\,(k+m)!}(x/2)^{m+2k}\), a tagok rekurziója \(t_{k+1}=-t_k\,\dfrac{x^2}{4(k+1)(k+1+m)}\), \(t_0=(x/2)^m/m!\) (a <code>jb</code> függvény). A sor \(x\le9\)-re 30 taggal bőven konvergál.</p></details></div><div class="card"><h2>Kód 6: csatolt kalapács gen~-ben</h2><p>A Kód 4-et váltja ki az erőpulzusnál: az erő a kalapács és a húr mozgásából jön (6.6). Bemenet <code>[click~]</code>. Hangolható: kalapács tömege, sebessége, \(\tau_w\), \(p_e\), ütés helye.</p><pre><code>// Kód 6: csatolt kalapács–húr (gen~). in1: trigger (click~), out1: hang
+// A Kód 4 stílusában írva; Max-ban nem futtattam.
+Param f1(220, min=50, max=1000);  Param T60(2, min=0.2, max=6);  Param bt(0.2, min=0, max=1);
+Param p(0.13, min=0.02, max=0.5); Param q(0.7, min=0.02, max=0.98);   // gerjesztés, hallgatás helye
+Param mh(0.5, min=0.05, max=10);  Param vh(1, min=0.1, max=4);        // kalapács/modális tömeg, sebesség
+Param tauW(1.5, min=0.1, max=5);  Param pe(2.5, min=1, max=4);        // falra ütve [ms], kitevő
+Data X(16), V(16), C(80);  History yh(0), vv(0), Kc(0), lf(0), hin(0), act(0);
+fs = samplerate;  dt = 1/fs;  s1 = log(1000)/T60;
+trig = (in1 &gt; 0.5) &amp;&amp; (hin &lt;= 0.5);  hin = in1;
+if (trig) {
+  q1 = pe + 1;  B = 0;
+  for (i = 0; i &lt; 40; i += 1) { z = (i + 0.5)/40; B += 2*z/sqrt(1 - pow(1 - z*z, q1))/40; }
+  dm = tauW*0.001*vh/(2*B);  Kc = q1*mh*vh*vh/(2*pow(dm, q1));
+  yh = 0;  vv = vh;  act = 1;  lf = 0;
+}
+yf = 0;  Hx = 0;
+for (k = 0; k &lt; 16; k += 1) {
+  n = k + 1;  f = n*f1;
+  if (f &lt; 0.45*fs) {
+    w = TWOPI*f;  s = s1*(1 + bt*(n*n - 1));  wd = sqrt(w*w - s*s);  th = wd*dt;
+    E = exp(-s*dt);  c = cos(th);  sn = sin(th);  c11 = E*(c + s/wd*sn);
+    poke(C, c11, 5*k);  poke(C, E*sn/wd, 5*k+1);  poke(C, -E*w*w/wd*sn, 5*k+2);
+    poke(C, E*(c - s/wd*sn), 5*k+3);  poke(C, (1 - c11)/(w*w), 5*k+4);
+    up = sin(n*pi*p);  x = peek(X, k);  v = peek(V, k);
+    yf += up*(c11*x + peek(C, 5*k+1)*v);  Hx += up*up*peek(C, 5*k+4);
+  }
+}
+F = 0;  d0 = yh + vv*dt - yf;  S = dt*dt/mh + Hx;
+if (act &amp;&amp; d0 &gt; 0) {
+  a = 0;  b = Kc*pow(d0, pe);
+  for (it = 0; it &lt; 30; it += 1) {
+    m = 0.5*(a + b);  r = d0 - S*m;  r = r &gt; 0 ? r : 0;
+    if (m &gt; Kc*pow(r, pe)) { b = m; } else { a = m; }
+  }
+  F = 0.5*(a + b);
+}
+yh += vv*dt - dt*dt/mh*F;  vv -= dt/mh*F;
+if (F &gt; 0) { lf = 0; } else { lf += 1; }
+if (lf &gt; 0.03*fs) { act = 0; }
+out = 0;
+for (k = 0; k &lt; 16; k += 1) {
+  n = k + 1;
+  if (n*f1 &lt; 0.45*fs) {
+    up = sin(n*pi*p);  x = peek(X, k);  v = peek(V, k);
+    xn = peek(C,5*k)*x + peek(C,5*k+1)*v + peek(C,5*k+4)*up*F;
+    vn = peek(C,5*k+2)*x + peek(C,5*k+3)*v + peek(C,5*k+1)*up*F;
+    poke(X, xn, k);  poke(V, vn, k);  out += sin(n*pi*q)*xn;
+  }
+}
+out1 = out*20;</code></pre><details class="card" style="margin:12px 0 0;box-shadow:none"><summary><b>Levezetés az elméletből, sorról sorra</b></summary>
+<p><b>1. Pontos léptetés egy módusra.</b> \(\dot{\mathbf s}=\mathbf A\mathbf s+\mathbf bF\) állandó \(F\)-nél (6.10 B). A kód egy módushoz öt számot tárol a <code>C</code> tömbben: <code>c11</code> (<code>C[5k]</code>), \(c_{12}=e^{-\sigma\Delta t}\sin\theta/\omega_d\) (<code>C[5k+1]</code>), \(c_{21}=-e^{-\sigma\Delta t}\tfrac{\omega^2}{\omega_d}\sin\theta\), \(c_{22}\), \(b_x=(1-c_{11})/\omega^2\) (<code>C[5k+4]</code>). A sebesség erőtagja \(b_v=c_{12}\), azért szerepel a <code>C[5k+1]*up*F</code> a <code>vn</code>-ben.</p>
+<p><b>2. Szabad előrejelzés.</b> Ha \(F=0\), a pont helye \(y_{\rm szabad}=\sum u_n(p)(c_{11}x_n+c_{12}\dot x_n)\): <code>yf</code>. Az erő hatása \(H_xF\), \(H_x=\sum u_n(p)^2b_{x,n}\): <code>Hx</code>.</p>
+<p><b>3. Kalapács és tárgy egy lépésben.</b> \(y_h'=y_h+v_h\Delta t-\Delta t^2F/m_h\), \(y'=y_{\rm szabad}+H_xF\). Az összenyomódás \(\delta'=y_h'-y'=\delta_0-SF\), \(\delta_0=y_h+v_h\Delta t-y_{\rm szabad}\) (<code>d0</code>), \(S=\Delta t^2/m_h+H_x\) (<code>S</code>).</p>
+<p><b>4. Skaláregyenlet és felezés.</b> \(F=K\max(0,\delta_0-SF)^{p_e}\). Az \(h(F)=F-K(\delta_0-SF)_+^{p_e}\) szigorúan nő, \(h(0)\le0\), \(h(K\delta_0^{p_e})\ge0\), ezért a gyök a \([0,K\delta_0^{p_e}]\) szakaszon egyetlen: <code>a = 0; b = Kc*pow(d0, pe)</code>. Felezéskor ha \(m>K(\delta_0-Sm)_+^{p_e}\), a gyök \(m\) alatt van (<code>b = m</code>), különben fölötte (<code>a = m</code>). 30 lépés után a hiba \(2^{-30}\) a kezdő szakaszhoz képest. Ha \(\delta_0\le0\), nincs érintkezés, \(F=0\).</p>
+<p><b>5. Frissítések.</b> Kalapács: <code>yh += vv*dt - dt*dt/mh*F; vv -= dt/mh*F</code>. Módusok: <code>xn = c11*x + c12*v + bx*up*F</code>, <code>vn = c21*x + c22*v + c12*up*F</code>. Kimenet \(\sum u_n(q)x_n\): <code>out += sin(n*pi*q)*xn</code>.</p>
+<p><b>6. A \(K\) kalibrálása a falra ütési \(\tau_w\)-ből.</b> Rögzített falnál az energia \(\tfrac12m\dot\delta^2+\tfrac Kq\delta^q=\tfrac12mv_0^2\), \(q=p_e+1\), ebből \(\dot\delta=v_0\sqrt{1-(\delta/\delta_m)^q}\) és \(\tau=2\int_0^{\delta_m}d\delta/\dot\delta=2B\delta_m/v_0\), \(B=\int_0^1dz/\sqrt{1-z^q}\). A kód erre a \(z=1\)-ben szinguláris integrálra a helyettesítést használja: \(z=1-t^2\), \(dz=-2t\,dt\), így \(B=\int_0^1\dfrac{2t\,dt}{\sqrt{1-(1-t^2)^q}}\), ami mindenhol véges (\(t\to0\)-nál \(2/\sqrt q\)). 40 pontos középponti szabály: <code>B += 2*z/sqrt(1-pow(1-z*z,q1))/40</code>. Ezután \(\delta_m=\tau_wv_0/(2B)\) és \(K=\dfrac{q\,m_h v_0^2}{2\delta_m^q}\): <code>dm</code>, <code>Kc</code>.</p>
+<p><b>7. Vezérlés.</b> Az ütés a <code>click~</code> felfutó élén indul (<code>trig = (in1 &gt; 0.5) &amp;&amp; (hin &lt;= 0.5)</code>), ekkor \(y_h=0\), \(v_h=v_0\). Az érintkezés vége után 30 ms-mal a kalapács eltűnik (<code>lf &gt; 0.03*fs</code>), így az elpattanás és a második érintés is megmarad addig.</p></details></div></section>
+
+<section id="p-tasks"><div class="card"><h2>Feladatok (2. óra)</h2><ol>
+<li><b>Merev húr.</b> Számold ki a 10. felharmonikus frekvenciáját és eltérését centben, ha \(f_1=220\) Hz, \(B=4\cdot10^{-4}\). Ellenőrizd a demóban (húr, \(B=4\)).</li>
+<li><b>Rúd.</b> Mekkora az \(f_2\) és \(f_3\), ha egy szabad–szabad rúd \(f_1=300\) Hz? Hányszoros az \(f_2/f_1\) és miben más ez a húrhoz képest?</li>
+<li><b>Membrán.</b> Állítsd az ütés helyét 0-ra. Melyik módusok szólalnak meg, és milyen arányban állnak?</li>
+<li><b>Csillapítás.</b> \(T_{60}=2\) s, \(b=0{,}3\) mellett mekkora a 10. módus lecsengési ideje egy ideális húrnál? Használd \(\sigma_n=\sigma_1[1+b(r_n^2-1)]\)-t.</li>
+<li><b>Kalapács.</b> \(f_c=1000\) Hz. Hány dB-lel halkabb a 2000 Hz-es és a 4000 Hz-es módus a vágófrekvenciánál?</li>
+<li><b>Flageolet.</b> Egy 220 Hz-es húrt a hosszának 1/3-ánál könnyedén megérintünk. Melyik harmonikusok maradnak, és mekkora lesz a hang frekvenciája? Ellenőrizd a „Flageolet 1/3” gombbal.</li><li><b>Lefogás.</b> Hol kell lefogni a húrt, hogy a hang tiszta kvint (3:2) legyen az üres húr fölött? Hány centtel tér el ettől a 7. félhangnyi fogás (\(x_f=1-2^{-7/12}\))?</li><li><b>Kontaktidő.</b> Filckalapács, \(p=3\). Hányszorosára változik \(\tau\), ha az ütés sebességét négyszeresére növeled? És ha a kalapács tömege nyolcszoros?</li><li><b>Schelleng.</b> A vonót a hídtól \(\beta=0{,}10\)-re, majd \(\beta=0{,}05\)-re teszed. Hogyan változik a legnagyobb játszható vonóerő? Próbáld ki a Játékmódok fülön.</li><li><b>gen~.</b> A Kód 4-ben állítsd \(p=0{,}25\)-re. Melyik harmonikusok tűnnek el? Mérd meg a <code>spectroscope~</code>-pal.</li></ol></div>
+<div class="card"><h2>Mini-teszt (5 kérdés, 10 pont)</h2><ol>
+<li>(2 pont) \(f_1=220\) Hz, \(B=4\cdot10^{-4}\): mekkora a 10. felharmonikus?</li>
+<li>(2 pont) Szabad–szabad rúdban mekkora \(f_2/f_1\)?</li>
+<li>(2 pont) Húr \(L/4\)-nél pengetve: melyik harmonikusok hiányoznak?</li>
+<li>(2 pont) Miért tompább a dob hangja középen ütve?</li>
+<li>(2 pont) Egy lemez vastagságát és sugarát is felezzük. Hogyan változik a frekvencia?</li></ol>
+<p>Skála: 9–10 kiváló; 7–8 jó; 5–6 megfelelő; 4 vagy kevesebb: olvasd át újra az Elméletet.</p></div>
+<details class="card"><summary><h2>Megoldások</h2></summary>
+<p><b>1.</b> \(f_{10}=2200\sqrt{1{,}04}=2243{,}6\) Hz, eltérés 43,6 Hz, \(1200\log_2(1{,}0198)\approx34\) cent.</p>
+<p><b>2.</b> \(f_2=300\cdot2{,}757=827\) Hz, \(f_3=300\cdot5{,}404=1621\) Hz. A húrnál \(f_2/f_1=2\) (oktáv), itt 2,76, nem egész, ezért harangszerű a hang.</p>
+<p><b>3.</b> Csak az \(m=0\) módusok: (0,1), (0,2), (0,3), mert \(J_m(0)=0\), ha \(m>0\). Arányuk \(1:2{,}295:3{,}598\).</p>
+<p><b>4.</b> \(\sigma_1=6{,}9078/2=3{,}454\) 1/s. \(r_{10}=10\): \(\sigma_{10}=3{,}454\,(1+0{,}3\cdot99)=106\) 1/s, \(T_{60}=6{,}9078/106\approx65\) ms (az alaphang 2 s-éhez képest).</p>
+<p><b>5.</b> \(g=1/\sqrt{1+(f/f_c)^2}\): 2000 Hz-nél \(1/\sqrt5=0{,}447\), kb. −7 dB; 4000 Hz-nél \(1/\sqrt{17}=0{,}243\), kb. −12 dB.</p>
+<p><b>6.</b> A 4., 8., 12., 16. harmonikus.</p><p><b>7.</b> \(\sin(n\pi/3)=0\) pontosan akkor, ha \(3\mid n\): a 3., 6., 9. … harmonikus marad. A hang \(3\cdot220=660\) Hz (az alaphang fölött egy oktáv és egy kvint, „tizenkettedik”).</p><p><b>8.</b> \(1/(1-x_f)=3/2\), ebből \(x_f=1/3\). A 7. félhangnál \(x_f=1-2^{-7/12}=0{,}3326\), \(f/f_1=2^{7/12}=1{,}4983\), eltérés \(1200\log_2(1{,}4983/1{,}5)\approx-2\) cent.</p><p><b>9.</b> \(\tau\propto v^{-(p-1)/(p+1)}=v^{-1/2}\): négyszeres sebességnél \(\tau\) a felére csökken. \(\tau\propto m_h^{1/(p+1)}=m_h^{1/4}\): nyolcszoros tömegnél \(8^{1/4}\approx1{,}68\)-szoros.</p><p><b>10.</b> \(F_{\max}\propto1/\beta\): \(\beta\) felezésénél a határ kétszeresére nő (a hídhoz közel nagyobb erő kell).</p>
+<p><b>Mini-teszt.</b> (1) 2243,6 Hz. (2) 2,757. (3) Minden 4. (4., 8., 12. …). (4) Középen csak az \(m=0\) módusok gerjesztődnek, a magasabb, nem körszimmetrikus módusok hiányoznak. (5) \(\omega\propto h/R^2\): a vastagság felezése ½-szeres, a sugár felezése 4-szeres tényezőt ad, így a frekvencia kétszeresére nő.</p></details></section>
+
+<section id="p-ref"><div class="card"><h2>Szótár (magyar – angol)</h2><div class="scroll"><table><tr><th>Fogalom</th><th>Angolul</th><th>Jelentés</th></tr>
+<tr><td>Inharmonicitás, B</td><td>inharmonicity</td><td>A felhangok eltérése az egész többszörösektől; merev húrnál \(f_n=nf_1\sqrt{1+Bn^2}\).</td></tr>
+<tr><td>Szabad–szabad rúd</td><td>free–free bar</td><td>Mindkét végén szabad rúd; arányok 1 : 2,76 : 5,40.</td></tr>
+<tr><td>Bessel-függvény</td><td>Bessel function</td><td>A kör membrán radiális módusalakja, \(J_m\); zérushelyei adják a frekvenciákat.</td></tr>
+<tr><td>Csomóvonal</td><td>nodal line</td><td>A módusalak nullhelyei; itt ütve a módus nem szólal meg.</td></tr>
+<tr><td>Diszperzió</td><td>dispersion</td><td>A hullámsebesség függ a frekvenciától (lemez, merev húr).</td></tr>
+<tr><td>Veszteségi tényező</td><td>loss factor</td><td>\(\eta\); \(\sigma_n=\eta\omega_n/2\).</td></tr>
+<tr><td>Kontaktidő</td><td>contact time</td><td>A kalapács és a tárgy érintkezési ideje \(\tau\); \(f_c\sim1/\tau\).</td></tr>
+<tr><td>Lefogás</td><td>stopping, fretting</td><td>A húr ujjal való lerövidítése: \(f=f_1/(1-x_f)\).</td></tr>
+<tr><td>Tompítás</td><td>damping, muting</td><td>Egy pontban való fékezés: \(\sigma_n\to\sigma_n+\kappa\,u_n(x_d)^2\).</td></tr>
+<tr><td>Flageolet</td><td>harmonic</td><td>A húr csomópontban való megérintése: a csomó nélküli módusok elhalnak.</td></tr>
+<tr><td>Pengetés</td><td>plucking</td><td>Statikus lehajlásból induló gerjesztés, \(x_n(0)=u_n(p)/\omega_n^2\).</td></tr>
+<tr><td>Tapad–csúszik</td><td>stick–slip</td><td>A vonás súrlódásvezérelt gerjesztése: a húr hol együtt mozog a vonóval, hol visszacsúszik.</td></tr>
+<tr><td>Helmholtz-mozgás</td><td>Helmholtz motion</td><td>A vonott húr szabályos mozgása: egyetlen éles sarok fut körbe.</td></tr>
+<tr><td>Hertz-érintkezés</td><td>Hertzian contact</td><td>Az érintkezési erő \(F=K\delta^{p}\), golyó–síknál \(p=3/2\).</td></tr>
+<tr><td>Gyanta</td><td>rosin</td><td>Növeli a \(\mu_s-\mu_d\) súrlódási különbséget.</td></tr>
+<tr><td>Végeselem-módszer</td><td>finite element method</td><td>A tárgy hálóra bontása, \(\mathbf M\), \(\mathbf K\) felépítése és sajátérték-számítás.</td></tr></table></div></div>
+<div class="card"><h2>Források</h2><p style="font-size:14px">A számozás az 1/2 részével folytatódik.</p><div class="scroll"><table><tr><th>Jel</th><th>Hivatkozás</th><th>Mire használható</th></tr>
+<tr><td>[3]</td><td>van den Doel, K., Pai, D. K. (1998). The Sounds of Physical Shapes. <i>Presence</i> 7(4), 382–395.</td><td>ütés helye, módusok mérése, bank</td></tr>
+<tr><td>[4]</td><td>van den Doel, K., Kry, P. G., Pai, D. K. (2001). FoleyAutomatic. <i>SIGGRAPH 2001</i>, 537–544.</td><td>mért és számolt módusparaméterek</td></tr>
+<tr><td>[5]</td><td>O'Brien, J. F., Cook, P. R., Essl, G. (2001). Synthesizing Sounds from Physically Based Motion. <i>SIGGRAPH 2001</i>, 529–536.</td><td>végeselemes módusok</td></tr>
+<tr><td>[12]</td><td>Cook, P. R. (2002). <i>Real Sound Synthesis for Interactive Applications</i>, A K Peters.</td><td>kalapács, gyakorlat</td></tr>
+<tr><td>[13]</td><td>Inman, D. J. <i>Engineering Vibration</i>, Pearson.</td><td>rudak, folytonos rendszerek</td></tr>
+<tr><td>[15]</td><td>Bilbao, S. (2009). <i>Numerical Sound Synthesis</i>, Wiley.</td><td>húr, rúd, lemez, nemlineáris modellek</td></tr>
+<tr><td>[18]</td><td>Fletcher, H. (1964). Normal Vibration Frequencies of a Stiff Piano String. <i>J. Acoust. Soc. Am.</i> 36(1), 203–209.</td><td>merev húr, inharmonicitás</td></tr>
+<tr><td>[19]</td><td>Fletcher, N. H., Rossing, T. D. (1998). <i>The Physics of Musical Instruments</i>, 2. kiadás, Springer.</td><td>húr, rúd, membrán, lemez képletei</td></tr>
+<tr><td>[20]</td><td>Chaigne, A., Lambourg, C. (2001). Time-domain simulation of damped impacted plates. I. <i>J. Acoust. Soc. Am.</i> 109(4), 1422–1432.</td><td>frekvenciafüggő csillapítás, ütés</td></tr>
+<tr><td>[21]</td><td>Abramowitz, M., Stegun, I. A. (1964). <i>Handbook of Mathematical Functions</i>, NBS.</td><td>Bessel-függvények zérushelyei</td></tr>
+<tr><td>[22]</td><td>Leissa, A. W. (1969). <i>Vibration of Plates</i>, NASA SP-160.</td><td>lemezek frekvenciái</td></tr>
+<tr><td>[23]</td><td>Schelleng, J. C. (1973). The bowed string and the player. <i>J. Acoust. Soc. Am.</i> 53(1), 26–41.</td><td>vonóerő-sáv, \(F_{\max}\), \(F_{\min}\)</td></tr>
+<tr><td>[24]</td><td>McIntyre, M. E., Schumacher, R. T., Woodhouse, J. (1983). On the oscillations of musical instruments. <i>J. Acoust. Soc. Am.</i> 74(5), 1325–1345.</td><td>vonott húr, súrlódásos gerjesztés</td></tr>
+<tr><td>[25]</td><td>Chaigne, A., Askenfelt, A. (1994). Numerical simulations of piano strings. I. <i>J. Acoust. Soc. Am.</i> 95(2), 1112–1118.</td><td>kalapács–húr kölcsönhatás, \(p\) kitevő</td></tr>
+<tr><td>[26]</td><td>Stulov, A. (1995). Hysteretic model of the grand piano hammer felt. <i>J. Acoust. Soc. Am.</i> 97(4), 2577–2585.</td><td>filckalapács, hiszterézis</td></tr>
+<tr><td>[27]</td><td>Woodhouse, J., Galluzzo, P. M. (2004). The bowed string as we know it today. <i>Acta Acustica united with Acustica</i> 90(4), 579–589.</td><td>vonott húr áttekintés</td></tr>
+<tr><td>[28]</td><td>Helmholtz, H. (1863). <i>Die Lehre von den Tonempfindungen</i>, Vieweg.</td><td>Helmholtz-mozgás</td></tr>
+<tr><td>[29]</td><td>Hertz, H. (1882). Über die Berührung fester elastischer Körper. <i>J. reine angew. Math.</i> 92, 156–171.</td><td>Hertz-érintkezés</td></tr></table></div></div></section>
+</div>
+<script>
+const $=i=>document.getElementById(i),nf=(x,d)=>x.toFixed(d).replace('.',','),TAU=Math.PI*2;let ctx=null,cur=null;
+function fit(c){const d=devicePixelRatio||1,w=c.clientWidth,h=c.clientHeight;if(!w)return false;if(c._w!==w){c.width=w*d;c.height=h*d;c._w=w}c.getContext('2d').setTransform(d,0,0,d,0,0);return true}
+function actx(){ctx=ctx||new(window.AudioContext||window.webkitAudioContext)();if(ctx.state==='suspended')ctx.resume();return ctx}
+function bank(fs,M,T){const n=Math.floor(fs*T),y=new Float32Array(n),dt=1/fs;
+ M.forEach(o=>{if(o.w>=0.9*Math.PI*fs||o.s>=o.w)return;const wd=Math.sqrt(o.w*o.w-o.s*o.s),r=Math.exp(-o.s*dt),th=wd*dt,a1=2*r*Math.cos(th),a2=-r*r,g=o.a/wd*Math.sin(th);let y1=0,y2=0;
+  for(let i=0;i<n;i++){const v=(i?0:g)+a1*y1+a2*y2;y[i]+=v;y2=y1;y1=v}});
+ let pk=0;for(let i=0;i<n;i++)pk=Math.max(pk,Math.abs(y[i]));const k=.5/(pk||1);for(let i=0;i<n;i++){y[i]*=k;if(i>n-1000)y[i]*=(n-i)/1000}return y}
+const fact=n=>n<2?1:n*fact(n-1);
+function J(m,x){let t=Math.pow(x/2,m)/fact(m),s=0;for(let k=0;k<40;k++){s+=t;t*=-(x*x/4)/((k+1)*(k+1+m))}return s}
+const MB=[[0,2.4048],[1,3.8317],[2,5.1356],[0,5.5201],[3,6.3802],[1,7.0156],[4,7.5883],[2,8.4172],[0,8.6537],[5,8.7715]];
+function modes(){const o=$('ob').value,f1=+$('of').value,T=+$('ot').value,b=+$('oq').value/100,fc=+$('oc').value,v=$('op').value/100,B=+$('oB').value*1e-4,s1=6.9078/T,M=[];
+ for(let n=1;n<=10;n++){let f,a;
+  if(o==='s'){const p=.02+.48*v;f=n*f1*Math.sqrt(1+B*n*n);a=Math.pow(Math.sin(n*Math.PI*p),2)}
+  else if(o==='b'){const p=.5*v,bn=n<3?[4.73,7.8532][n-1]:(n+.5)*Math.PI,x=bn*p,sg=(Math.cosh(bn)-Math.cos(bn))/(Math.sinh(bn)-Math.sin(bn)),ph=Math.cosh(x)+Math.cos(x)-sg*(Math.sinh(x)+Math.sin(x));f=f1*Math.pow(bn/4.73,2);a=ph*ph}
+  else{const m=MB[n-1][0],j=MB[n-1][1],p=.95*v;f=f1*j/MB[0][1];a=Math.pow(J(m,j*p)/J(m+1,j),2)}
+  const r=f/f1;M.push({n,f,w:TAU*f,s:s1*(1+b*(r*r-1)),a:a/Math.sqrt(1+f*f/(fc*fc))})}
+ return M}
+function draw(){const M=modes(),c=$('cv'),f1=M[0].f;$('info').textContent='f/f₁ = '+M.map(o=>nf(o.f/f1,2)).join(' : ');if(!fit(c))return;
+ const x=c.getContext('2d'),W=c.clientWidth,H=c.clientHeight,cs=getComputedStyle(document.documentElement),ink=cs.getPropertyValue('--ink').trim(),pk=cs.getPropertyValue('--pink').trim(),fm=Math.max(...M.map(o=>o.f))*1.05,A=M.map(o=>Math.abs(o.a)/o.w),mx=Math.max(...A,1e-30);
+ x.clearRect(0,0,W,H);x.strokeStyle=ink;x.fillStyle=ink;x.font='12px sans-serif';x.beginPath();x.moveTo(20,H-18);x.lineTo(W-6,H-18);x.stroke();x.fillText('0 Hz',16,H-4);x.fillText(nf(fm,0)+' Hz',W-70,H-4);
+ M.forEach((o,i)=>{const db=Math.max(-60,20*Math.log10(A[i]/mx+1e-12)),X=20+(W-30)*o.f/fm,h=(60+db)/60*(H-40);x.strokeStyle=pk;x.lineWidth=3;x.beginPath();x.moveTo(X,H-18);x.lineTo(X,H-18-h);x.stroke();x.fillStyle=pk;x.beginPath();x.arc(X,H-18-h,4,0,TAU);x.fill();x.fillStyle=ink;x.fillText(o.n,X-3,H-22-h-4)});x.lineWidth=1}
+document.querySelectorAll('.ctl input').forEach(i=>{const o=i.nextElementSibling,u=()=>o.textContent=i.value+(i.dataset.u||'');u();i.oninput=()=>{u();draw()}});
+$('ob').onchange=draw;
+$('go').onclick=()=>{const c=actx(),M=modes(),y=bank(c.sampleRate,M,Math.min(7,Math.max(1.5,+$('ot').value*1.2))),b=c.createBuffer(1,y.length,c.sampleRate);b.copyToChannel(y,0);if(cur){try{cur.stop()}catch(e){}}const s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start();cur=s};
+document.querySelectorAll('#tabs button[data-id]').forEach(b=>b.onclick=()=>{document.querySelectorAll('#tabs button[data-id]').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('section').forEach(s=>s.classList.toggle('active',s.id==='p-'+b.dataset.id));if(b.dataset.id==='demo')draw()});
+addEventListener('resize',draw);draw();
+/* ===== 1/2 stílusú ábrák minden blokkhoz ===== */
+const VZ=[],PI=Math.PI,sin=Math.sin,cos=Math.cos,sqrt=Math.sqrt,l10=Math.log10,CT=k=>document.querySelectorAll('#p-theory>.card')[k],CC=k=>document.querySelectorAll('#p-code>.card')[k];
+let C={};function cc(){const s=getComputedStyle(document.documentElement),g=n=>s.getPropertyValue(n).trim();C={ink:g('--ink'),pk:g('--pink'),dp:g('--deep'),gr:g('--ink')+'33'}}
+function play(y){const c=actx(),b=c.createBuffer(1,y.length,c.sampleRate);b.copyToChannel(y,0);if(cur){try{cur.stop()}catch(e){}}const s=c.createBufferSource();s.buffer=b;s.connect(c.destination);s.start();cur=s}
+const Z=(g,W,H)=>{g.clearRect(0,0,W,H);g.strokeStyle=C.gr;g.lineWidth=1;g.beginPath();g.moveTo(0,H/2);g.lineTo(W,H/2);g.stroke()},
+LN=(g,p,c,w)=>{g.strokeStyle=c||C.ink;g.lineWidth=w||2;g.beginPath();p.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();g.lineWidth=1},
+TX=(g,s,x,y)=>{g.fillStyle=C.ink;g.font='12px sans-serif';g.fillText(s,x,y)},
+DOT=(g,x,y,r,c)=>{g.fillStyle=c;g.beginPath();g.arc(x,y,r,0,7);g.fill()},
+VL=(g,x,a,b,c)=>{g.strokeStyle=c;g.setLineDash([4,3]);g.beginPath();g.moveTo(x,a);g.lineTo(x,b);g.stroke();g.setLineDash([])};
+const DB=(S,R)=>{const m=Math.max(...(R||S).map(o=>Math.abs(o.a)/o.w),1e-30);return S.map(o=>20*l10(Math.abs(o.a)/o.w/m+1e-12))};
+function SP(g,W,H,fr,lv,col,fm,keep){fm=fm||Math.max(...fr)*1.05;if(!keep){g.clearRect(0,0,W,H);LN(g,[[10,H-16],[W-4,H-16]],C.ink,1);TX(g,'0 Hz',4,H-3);TX(g,nf(fm,0)+' Hz',W-64,H-3);TX(g,'szint (dB, a legerősebbhez képest)',6,13)}
+ fr.forEach((f,i)=>{const X=14+(W-24)*f/fm,h=(60+Math.max(-60,lv[i]))/60*(H-36);LN(g,[[X,H-16],[X,H-16-h]],col,3);DOT(g,X,H-16-h,3.5,col)})}
+const bnv=(t,n)=>t=='c'?(n<3?[1.8751,4.6941][n-1]:(n-.5)*PI):(n<3?[4.73,7.8532][n-1]:(n+.5)*PI);
+function phi(t,n,x){const b=bnv(t,n),X=b*x;if(t=='c'){const s=(Math.cosh(b)+cos(b))/(Math.sinh(b)+sin(b));return Math.cosh(X)-cos(X)-s*(Math.sinh(X)-sin(X))}const s=(Math.cosh(b)-cos(b))/(Math.sinh(b)-sin(b));return Math.cosh(X)+cos(X)-s*(Math.sinh(X)+sin(X))}
+function OMs(o,f1,p,q,B,K){const M=[];if(o=='s')for(let n=1;n<=(K||16);n++)M.push({n,f:n*f1*sqrt(1+B*n*n),a:sin(n*PI*p)*sin(n*PI*q)});
+ else if(o=='m')for(let n=1;n<=10;n++){const[m,j]=MB[n-1];M.push({n,f:f1*j/MB[0][1],a:J(m,j*p)*J(m,j*q)/J(m+1,j)**2})}
+ else for(let n=1;n<=8;n++)M.push({n,f:f1*(bnv(o,n)/bnv(o,1))**2,a:phi(o,n,p)*phi(o,n,q)});return M}
+const PM=(o,v)=>o=='s'?.02+.48*v/100:o=='m'?.95*v/100:v/100;
+function MS(M,P){const f1=M[0].f;return M.map(o=>{const r=o.f/f1,s=P.eta?P.eta*TAU*o.f/2:(6.9078/P.T)*(1+P.b*(r*r-1));return{n:o.n,f:o.f,w:TAU*o.f,s,a:o.a/sqrt(1+(o.f/(P.fc||1e9))**2)}})}
+const miss=S=>{const m=Math.max(...S.map(o=>Math.abs(o.a)/o.w));return S.filter(o=>Math.abs(o.a)/o.w<1e-6*m).map(o=>o.n)},DEF={T:2,b:.2,fc:6000},snd=(S,T)=>bank(actx().sampleRate,S,T||2.5);
+function viz(el,t,hint,cs,draw,o={}){const d=document.createElement('div');d.className='viz';
+ d.innerHTML=`<div class="intuition"><div class="intuition-title">🎛 ${t}</div>${hint}</div>`+cs.map(c=>c[2]=='s'?`<label style="font-size:14px;display:block;margin:6px 0">${c[1]}: <select data-i="${c[0]}">${c[3].map(v=>`<option value="${v[0]}"${v[0]==c[4]?' selected':''}>${v[1]}</option>`).join('')}</select></label>`:`<div class="ctl"><label>${c[1]}</label><input type="range" data-i="${c[0]}" min="${c[2]}" max="${c[3]}" value="${c[4]}" step="${c[5]||1}"><output></output></div>`).join('')+(o.snd?'<button class="btn">'+(o.btn||'🔔 Ütés')+'</button>':'')+'<div class="box" style="font-family:\'Courier New\',monospace;font-size:13px;margin-top:8px" aria-live="polite"></div>'+(o.h||[170]).map(h=>`<canvas style="height:${h}px"></canvas>`).join('');
+ el.appendChild(d);const box=d.querySelector('.box'),cn=[...d.querySelectorAll('canvas')],rd=()=>{const V={};d.querySelectorAll('[data-i]').forEach(e=>V[e.dataset.i]=e.tagName=='SELECT'?e.value:+e.value);return V};
+ const R=t=>{const V=rd();cs.forEach(c=>{if(c[2]!='s')d.querySelector(`[data-i="${c[0]}"]`).nextElementSibling.textContent=c[6]?c[6](V[c[0]],V):V[c[0]]});if(!d.offsetParent||!cn.every(c=>fit(c)))return;cc();draw(cn.map(c=>({g:c.getContext('2d'),W:c.clientWidth,H:c.clientHeight})),V,t||performance.now(),s=>box.textContent=s)};
+ d.addEventListener('input',()=>R());d.addEventListener('change',()=>R());
+ if(o.snd)d.querySelector('button').onclick=()=>{const y=o.snd(rd());if(y)play(y)};VZ.push({r:R,a:o.anim,d});R()}
+function spec(el,t,h,cs,get){viz(el,t,h,cs,([{g,W,H}],V,tt,set)=>{const S=get(V).S;SP(g,W,H,S.map(o=>o.f),DB(S),C.pk);const m=miss(S);set('f/f₁ = '+S.slice(0,10).map(o=>nf(o.f/S[0].f,2)).join(' : ')+(S.length>10?' …':'')+'; kimaradó módusok: '+(m.length?m.join(', '):'nincs'))},{snd:V=>{const r=get(V);return snd(r.S,r.T)}})}
+(function L(t){VZ.forEach(v=>v.a&&v.d.offsetParent&&v.r(t));requestAnimationFrame(L)})();
+
+/* 1. lánc → húr */
+const chR=(N,n)=>sin(n*PI/(2*N+2))/sin(PI/(2*N+2));
+viz(CT(0),'Lánc → húr: hány tömeg kell?','Növeld a tömegek számát (N). Fent a kiválasztott módus lassított felvétele: a pontok a tömegek, a görbe a folytonos húr alakja. Lent a frekvenciák aránya: pont = lánc, szürke vonal = húr (1 : 2 : 3 …). Kevés tömegnél a magas módusok „lehajlanak”, nagy N-nél ráülnek a vonalra.',
+ [['N','Tömegek száma N',2,40,6],['n','Módus sorszáma n',1,40,2],['f','Alapfrekvencia',100,600,220,1,v=>v+' Hz']],
+ ([a,b],V,t,set)=>{const N=V.N,n=Math.min(V.n,N),r=chR(N,n),k=cos(PI*Math.min(r,8)*t/1000);let{g,W,H}=a;const A=H/2-20,px=j=>20+(W-40)*j/(N+1);Z(g,W,H);
+  g.fillStyle=C.ink;g.fillRect(14,H/2-14,6,28);g.fillRect(W-20,H/2-14,6,28);LN(g,Array.from({length:W-39},(_,i)=>[20+i,H/2-sin(n*PI*i/(W-40))*k*A]),C.gr,2);
+  for(let j=1;j<=N;j++)DOT(g,px(j),H/2-sin(n*j*PI/(N+1))*k*A,N>20?4:7,C.dp);
+  g=b.g;W=b.W;H=b.H;g.clearRect(0,0,W,H);const X=m=>20+(W-40)*(m-1)/Math.max(1,N-1),Y=v=>H-18-(H-34)*v/N;LN(g,[[X(1),Y(1)],[X(N),Y(N)]],C.gr,2);LN(g,[[20,H-16],[W-4,H-16]],C.ink,1);
+  for(let m=1;m<=N;m++)DOT(g,X(m),Y(chR(N,m)),m==n?6:4,m==n?C.pk:C.dp);TX(g,'fₙ/f₁ (n = 1 … N)',6,13);TX(g,'n = '+N,W-50,H-3);
+  set(`N = ${N}: f${n}/f₁ = ${nf(r,3)} (húr: ${n}), eltérés ${nf(1200*Math.log2(r/n),0)} cent; f${n} = ${nf(V.f*r,1)} Hz`)},
+ {anim:1,h:[140,130],snd:V=>{const N=V.N,p=Math.max(1,Math.round((N+1)/3));return snd(MS(Array.from({length:N},(_,i)=>({n:i+1,f:V.f*chR(N,i+1),a:sin((i+1)*PI*p/(N+1))**2})),DEF))}});
+
+/* 2. húr */
+viz(CT(1),'Merev húr: inharmonicitás és az ütés helye','A rózsaszín oszlopok a módusok szintje, a szürke függőleges vonalak a harmonikus sor helyei. Növeld B-t: a felhangok elcsúsznak. Állítsd az ütés helyét 25 %-ra: a 4., 8., 12. módus kiesik. Alul a harmonikustól való eltérés centben.',
+ [['f','Alapfrekvencia f₁',80,1000,220,1,v=>v+' Hz'],['B','Merevség B',0,100,4,1,v=>nf(v*1e-4,4)],['p','Ütés helye p',2,50,20,1,v=>v+' % L']],
+ ([a,b],V,t,set)=>{const B=V.B*1e-4,p=V.p/100,S=MS(OMs('s',V.f,p,p,B),DEF),fm=S[15].f*1.05;SP(a.g,a.W,a.H,S.map(o=>o.f),DB(S),C.pk,fm);S.forEach(o=>VL(a.g,14+(a.W-24)*o.n*V.f/fm,16,a.H-16,C.gr));
+  const{g,W,H}=b,cs=S.map(o=>1200*Math.log2(o.f/(o.n*V.f))),cm=Math.max(50,...cs);g.clearRect(0,0,W,H);LN(g,[[10,H-16],[W-4,H-16]],C.ink,1);cs.forEach((c,i)=>{const X=20+(W-40)*(i+.5)/16,h=c/cm*(H-36);LN(g,[[X,H-16],[X,H-16-h]],C.dp,6);TX(g,i+1,X-4,H-3)});TX(g,'eltérés a harmonikustól (cent), max '+nf(cm,0),6,13);
+  const m=miss(S);set(`f₁₀ = ${nf(S[9].f,1)} Hz (harmonikus: ${nf(10*V.f,0)} Hz), eltérés ${nf(cs[9],1)} cent; kimaradó harmonikusok: ${m.length?m.join(', '):'nincs'}`)},
+ {h:[150,110],snd:V=>snd(MS(OMs('s',V.f,V.p/100,V.p/100,V.B*1e-4),DEF))});
+
+/* 3. rúd */
+viz(CT(2),'Rúd: módusalakok és az ütés helye','Válaszd ki a rúd típusát és egy módust: a görbe a lassított felvétel, a rózsaszín pont az ütés helye. Ahol a görbe nulla (csomópont), az a módus kimarad. Szabad–szabad rúdnál 50 % a közép (páros módusok kiesnek), befogottnál 0 % a fal (néma).',
+ [['t','Rúd típusa','s',[['b','szabad–szabad'],['c','befogott–szabad']]],['f','Alapfrekvencia f₁',80,1000,300,1,v=>v+' Hz'],['n','Megjelenített módus n',1,6,2],['p','Ütés helye',0,100,100,1,v=>v+' %']],
+ ([a,b],V,t,set)=>{const S=MS(OMs(V.t,V.f,V.p/100,V.p/100,0),DEF),n=V.n,r=S[n-1].f/S[0].f,k=cos(PI*Math.min(r,6)*t/1000),xs=Array.from({length:101},(_,i)=>phi(V.t,n,i/100)),mx=Math.max(...xs.map(Math.abs)),{g,W,H}=a,A=H/2-16,X=x=>20+(W-40)*x;Z(g,W,H);
+  if(V.t=='c'){g.fillStyle=C.ink;g.fillRect(14,H/2-20,6,40)}LN(g,xs.map((v,i)=>[X(i/100),H/2-v/mx*k*A]),C.dp,3);const pv=phi(V.t,n,V.p/100)/mx;DOT(g,X(V.p/100),H/2-pv*k*A,7,C.pk);
+  SP(b.g,b.W,b.H,S.map(o=>o.f),DB(S),C.pk);const m=miss(S);set(`f/f₁ = ${S.map(o=>nf(o.f/S[0].f,2)).join(' : ')}; a ${n}. módus kitérése az ütés helyén: ${nf(pv,2)} (0 = csomópont); kimaradó: ${m.length?m.join(', '):'nincs'}`)},
+ {anim:1,h:[140,130],snd:V=>snd(MS(OMs(V.t,V.f,V.p/100,V.p/100,0),DEF))});
+
+/* 4. membrán és lemez */
+viz(CT(3),'Kör membrán: Bessel-módusok','Válaszd ki a módust: a rózsaszín és a kék a két ellentétes kitérés, a pont az ütés helye (a középponttól jobbra). A közepén ütve csak a körszimmetrikus (m = 0) módusok szólalnak meg. A lemez-csúszkák a h/R² méretezést mutatják: a vastagság duplázása és a sugár felezése együtt nyolcszoros frekvencia.',
+ [['f','Alapfrekvencia f₀₁',80,600,150,1,v=>v+' Hz'],['n','Megjelenített módus',1,10,2],['p','Ütés helye (középpont → perem)',0,100,50,1,v=>v+' %'],['h','Lemez: vastagság h',50,200,100,1,v=>v+' %'],['R','Lemez: sugár R',50,200,100,1,v=>v+' %']],
+ ([a,b],V,t,set)=>{const K=V.h/100/(V.R/100)**2,f1=V.f*K,[m,j]=MB[V.n-1],nc=MB.slice(0,V.n).filter(x=>x[0]==m).length,S=MS(OMs('m',f1,PM('m',V.p),PM('m',V.p),0),DEF),k=cos(PI*Math.min(S[V.n-1].f/S[0].f,3)*t/600),{g,W,H}=a,cx=W/2,cy=H/2,rd=H/2-10,G=44;
+  let pm=0;for(let i=0;i<=40;i++)pm=Math.max(pm,Math.abs(J(m,j*i/40)));g.clearRect(0,0,W,H);
+  for(let y=0;y<G;y++)for(let x=0;x<G;x++){const u=(x+.5)/G*2-1,w=(y+.5)/G*2-1,r=sqrt(u*u+w*w);if(r>1)continue;const v=J(m,j*r)*cos(m*Math.atan2(w,u))/pm*k;g.globalAlpha=Math.min(1,Math.abs(v));g.fillStyle=v>0?C.pk:C.dp;g.fillRect(cx-rd+x*2*rd/G,cy-rd+y*2*rd/G,2*rd/G+.6,2*rd/G+.6)}
+  g.globalAlpha=1;g.strokeStyle=C.ink;g.lineWidth=2;g.beginPath();g.arc(cx,cy,rd,0,7);g.stroke();g.lineWidth=1;const hx=cx+rd*PM('m',V.p)/.95*.95;DOT(g,hx,cy,6,C.ink);DOT(g,hx,cy,3.5,'#fff');
+  SP(b.g,b.W,b.H,S.map(o=>o.f),DB(S),C.pk);const a1=S[V.n-1];set(`(m,n) = (${m},${nc}); j = ${nf(j,3)}; f/f₀₁ = ${nf(a1.f/S[0].f,3)}; lemez: f ×${nf(K,2)} → f₀₁ = ${nf(f1,1)} Hz; szint: ${nf(DB(S)[V.n-1],1)} dB`)},
+ {anim:1,h:[230,130],snd:V=>snd(MS(OMs('m',V.f*V.h/100/(V.R/100)**2,PM('m',V.p),PM('m',V.p),0),DEF))});
+
+/* 5. csillapítás */
+const sg=(V,f)=>V.m=='e'?10**(-4+3*V.eta/100)*TAU*f/2:6.9078/V.T*(1+V.b/100*((f/V.f)**2-1));
+viz(CT(4),'Frekvenciafüggő csillapítás','Válassz modellt. Fent a T60 a frekvencia függvényében (log–log): a görbe lejt, vagyis a magas módusok gyorsabban halnak el. A pontok az f₁ harmonikusai. Lent a módusok szintje az időben: az 1., 3., 6. és 10. módus. A hangban is hallod: nagy b vagy η esetén tompa, fás lesz.',
+ [['m','Modell','s',[['b','σ₁·[1+b(r²−1)]'],['e','η (veszteségi tényező)']]],['f','Alapfrekvencia f₁',80,1000,220,1,v=>v+' Hz'],['T','T60 az alaphangon (b-modell)',.2,6,2,.1,v=>v+' s'],['b','Magas módusok féke b',0,100,20,1,v=>v+' %'],['eta','Veszteségi tényező η',0,100,33,1,v=>(10**(-4+3*v/100)).toExponential(1)]],
+ ([a,b],V,t,set)=>{let{g,W,H}=a;g.clearRect(0,0,W,H);const X=f=>20+(W-30)*Math.log(f/50)/Math.log(240),Y=T=>H-18-(H-34)*(l10(T)+3)/4,T6=(m,f)=>6.9078/sg({...V,m},f);[.01,.1,1,10].forEach(T=>{LN(g,[[10,Y(T)],[W,Y(T)]],C.gr,1);TX(g,T+' s',W-34,Y(T)-3)});
+  ['b','e'].forEach(m=>LN(g,Array.from({length:W-30},(_,i)=>{const f=50*240**(i/(W-30));return[X(f)+0,Math.max(0,Math.min(H-18,Y(T6(m,f))))]}),m==V.m?C.pk:C.dp,m==V.m?3:1.5));
+  for(let n=1;n<=16;n++)if(n*V.f<12000)DOT(g,X(n*V.f),Y(T6(V.m,n*V.f)),3,C.ink);TX(g,'T60(f), 50 … 12000 Hz; rózsaszín: kiválasztott modell',6,13);
+  g=b.g;W=b.W;H=b.H;g.clearRect(0,0,W,H);const tm=Math.min(6,Math.max(.1,1.3*T6(V.m,V.f))),Yd=d=>10+(H-24)*(-d)/70,Xt=u=>40+(W-44)*u/tm,cl=[C.pk,C.dp,C.ink,C.gr];[0,-20,-40,-60].forEach(d=>{LN(g,[[40,Yd(d)],[W,Yd(d)]],C.gr,1);TX(g,d+' dB',2,Yd(d)+4)});
+  [1,3,6,10].forEach((n,i)=>{const s=sg(V,n*V.f);LN(g,[[Xt(0),Yd(0)],[Xt(Math.min(tm,60/8.686/s)),Yd(Math.max(-70,-8.686*s*tm))]],cl[i],2.5);TX(g,'n='+n,44+i*44,H-4)});TX(g,'szint az időben, 0 … '+nf(tm,2)+' s',W-150,H-4);
+  set(`T60: f₁-nél ${nf(T6(V.m,V.f),2)} s, 3f₁-nél ${nf(T6(V.m,3*V.f),2)} s, 10f₁-nél ${nf(T6(V.m,10*V.f)*1000,0)} ms`)},
+ {h:[160,130],snd:V=>{const P=V.m=='e'?{eta:10**(-4+3*V.eta/100),fc:1e9}:{T:V.T,b:V.b/100,fc:1e9};return snd(MS(OMs('s',V.f,.2,.2,4e-4),P),Math.min(5,Math.max(.6,1.2*6.9078/sg(V,V.f))))}});
+
+/* 6. kalapács */
+viz(CT(5),'Kalapács: kontaktidő és vágófrekvencia','A rózsaszín görbe a kalapács átviteli szintje (−3 dB a vágófrekvenciánál). Lent a húr módusai kalapáccsal (rózsaszín) és ideális impulzussal (kék). Puha kalapácsnál (kis fc) csak a mély módusok maradnak, az erősebb ütés kicsit világosabbá teszi a hangot.',
+ [['fc','Vágófrekvencia fc (közepes ütésnél)',300,12000,6000,100,v=>v+' Hz'],['v','Ütés ereje',10,100,50,1,v=>v+' %'],['f','Alapfrekvencia f₁',80,1000,220,1,v=>v+' Hz'],['p','Ütés helye p',2,50,20,1,v=>v+' % L']],
+ ([a,b],V,t,set)=>{const fe=V.fc*(V.v/50)**.2,p=V.p/100,M=OMs('s',V.f,p,p,4e-4),S0=MS(M,{T:2,b:.2,fc:1e9}),S1=MS(M,{T:2,b:.2,fc:fe}),gd=f=>-10*l10(1+(f/fe)**2);let{g,W,H}=a;g.clearRect(0,0,W,H);const X=f=>20+(W-30)*Math.log(f/50)/Math.log(400),Y=d=>10+(H-24)*(-d)/40;
+  [0,-10,-20,-30,-40].forEach(d=>{LN(g,[[10,Y(d)],[W,Y(d)]],C.gr,1);TX(g,d+' dB',W-44,Y(d)-3)});LN(g,Array.from({length:W-30},(_,i)=>{const f=50*400**(i/(W-30));return[X(f),Y(gd(f))]}),C.pk,3);VL(g,X(fe),6,H-6,C.dp);S1.forEach(o=>{if(o.f<20000)DOT(g,X(o.f),Y(gd(o.f)),3,C.ink)});TX(g,'gₙ(f), 50 … 20000 Hz; pontok: a húr módusai',6,13);
+  const fm=S0[15].f*1.05;SP(b.g,b.W,b.H,S0.map(o=>o.f),DB(S0),C.dp,fm);SP(b.g,b.W,b.H,S1.map(o=>o.f),DB(S1,S0),C.pk,fm,1);
+  set(`fc(eff) = ${nf(fe,0)} Hz; érintkezési idő ≈ ${nf(1000/fe,2)} ms; 2fc-nél ${nf(gd(2*fe),1)} dB, 4fc-nél ${nf(gd(4*fe),1)} dB`)},
+ {h:[160,130],snd:V=>{const p=V.p/100;return snd(MS(OMs('s',V.f,p,p,4e-4),{T:2,b:.2,fc:V.fc*(V.v/50)**.2}))}});
+
+/* 7. honnan a számok / költség */
+viz(CT(6),'Mit érdemes kihagyni? Költség és minőség','Minden módus mintánként kb. 4 szorzás. A kihagyott módus szürke: vagy a Nyquist (0,45·fs) fölött van, vagy a lecsengése alatt −60 dB alá süllyed a megadott idő végére. A rózsaszín pont a megtartott módus szintje az idő végén, a függőleges vonal a lecsengés. A hang csak a megtartott módusokból áll.',
+ [['f','Alapfrekvencia f₁',50,1000,220,1,v=>v+' Hz'],['M','Módusok száma',4,64,24,1],['fs','Mintavétel fs',8000,96000,44100,1000,v=>v+' Hz'],['t','Meddig kell hallatszania',.05,2,.5,.05,v=>v+' s'],['T','T60 az alaphangon',.2,6,2,.1,v=>v+' s'],['b','Magas módusok féke b',0,100,20,1,v=>v+' %']],
+ ([{g,W,H}],V,tt,set)=>{const S=MS(OMs('s',V.f,.2,.2,4e-4,V.M),{T:V.T,b:V.b/100,fc:3000}),L=DB(S),Y=d=>10+(H-34)*(-d)/90;let ny=0,qu=0;g.clearRect(0,0,W,H);LN(g,[[10,Y(-60)],[W,Y(-60)]],C.dp,1);TX(g,'−60 dB',W-50,Y(-60)-3);
+  S.forEach((o,i)=>{const X=14+(W-24)*(i+.5)/V.M,Lt=Math.max(-90,L[i]-8.686*o.s*V.t),nyq=o.f>.45*V.fs,ok=!nyq&&Lt>-60;if(nyq)ny++;else if(!ok)qu++;o.k=ok;LN(g,[[X,Y(Math.max(-90,L[i]))],[X,Y(Lt)]],ok?C.pk:C.gr,2);DOT(g,X,Y(Lt),4,ok?C.pk:C.ink)});TX(g,'szint az idő végén (dB); n = 1 … '+V.M,6,H-4);
+  const K=S.filter(o=>o.k).length;set(`megtartva: ${K}/${V.M} (Nyquist fölött: ${ny}, túl halk: ${qu}); költség ≈ 4·${K}·${V.fs} = ${nf(4*K*V.fs/1e6,2)} millió szorzás/s`)},
+ {h:[190],snd:V=>{const S=MS(OMs('s',V.f,.2,.2,4e-4,V.M),{T:V.T,b:V.b/100,fc:3000}),L=DB(S),K=S.filter((o,i)=>o.f<.45*V.fs&&L[i]-8.686*o.s*V.t>-60);return K.length?snd(K,Math.min(5,V.T*1.2)):null}});
+
+/* 8. recept: lépésenként be/ki */
+const rec=V=>{const M=OMs(V.o,V.f,PM(V.o,V.p),PM(V.o,V.q),4e-4);if(V.l=='0')M.forEach(o=>o.a=1);return MS(M,{T:2,b:V.d=='1'?.3:0,fc:V.h=='1'?3000:1e9})};
+viz(CT(7),'Recept lépésenként: kapcsold ki, és hallgasd meg','Válassz tárgyat, majd kapcsold ki a recept egy-egy lépését. Csillapítás nélkül minden módus egyformán cseng (élettelen, „csöves” hang), az ütés helye nélkül nincs csomópont és nincs hangszín-változás, kalapács nélkül sivító lesz. Fent a spektrum, lent a hullámalak (22 kHz-es mintavétellel rajzolva).',
+ [['o','Tárgy','s',[['s','húr'],['b','szabad–szabad rúd'],['m','kör membrán']]],['f','Alapfrekvencia f₁',80,1000,220,1,v=>v+' Hz'],['p','Ütés helye p',0,100,30,1,v=>v+' %'],['q','Hallgatás helye q',0,100,70,1,v=>v+' %'],['d','2. lépés: csillapítás','s',[['1','módusonként (σₙ)'],['0','mind egyforma']]],['l','3. lépés: p és q hatása','s',[['1','aₙ = uₙ(p)·uₙ(q)/mₙ'],['0','mind egyforma (aₙ = 1)']]],['h','4. lépés: kalapács','s',[['1','gₙ szorzó'],['0','ideális impulzus']]]],
+ ([a,b],V,t,set)=>{const S=rec(V);SP(a.g,a.W,a.H,S.map(o=>o.f),DB(S),C.pk);const y=bank(22050,S,1.2),{g,W,H}=b;Z(g,W,H);g.fillStyle=C.dp;const st=y.length/W;for(let X=0;X<W;X++){let mn=1,mx=-1;for(let i=Math.floor(X*st),e=Math.min(y.length,Math.floor((X+1)*st)+1);i<e;i++){const v=y[i];if(v<mn)mn=v;if(v>mx)mx=v}g.fillRect(X,H/2-mx*H/2*.95,1,Math.max(1,(mx-mn)*H/2*.95))}TX(g,'0 … 1,2 s',6,H-4);
+  set(`${S.length} módus; csillapítás: ${V.d=='1'?'módusonként':'egyforma'}; p,q hatása: ${V.l=='1'?'be':'ki'}; kalapács: ${V.h=='1'?'be':'ki'}; kimaradó módusok: ${miss(S).join(', ')||'nincs'}`)},
+ {h:[150,110],snd:V=>snd(rec(V))});
+
+/* Kód 4 és Kód 5 hangja */
+spec(CC(0),'A Kód 4 hangja és spektruma','Ugyanazt a számolást végzi, mint a gen~ kód (16 módus), ugyanazokkal a paraméterekkel. Ellenőrizd: B = 0-nál harmonikus sor, p = 0,25-nél a 4. és 8. csúcs eltűnik.',
+ [['f','f1',50,1000,220,1,v=>v+' Hz'],['B','B',0,40,4,1,v=>nf(v*1e-4,4)],['T','T60',1,60,20,1,v=>nf(v/10,1)+' s'],['bt','bt',0,100,20,1,v=>nf(v/100,2)],['p','p',2,50,20,1,v=>nf(v/100,2)],['fc','fc',300,12000,6000,100,v=>v+' Hz']],
+ V=>({S:MS(OMs('s',V.f,V.p/100,V.p/100,V.B*1e-4),{T:V.T/10,b:V.bt/100,fc:V.fc}),T:Math.min(5,V.T/10*1.1)}));
+spec(CC(1),'A Kód 5 hangja: rúd és membrán','Válaszd ki a tárgyat: a frekvenciák a kódban szereplő képletekből jönnek (rúd: (βₙ/β₁)², membrán: Bessel-zérushelyek). A membrán erősségét itt a demó számolja ki.',
+ [['o','Tárgy','s',[['b','szabad–szabad rúd'],['m','kör membrán']]],['f','f1',80,1000,220,1,v=>v+' Hz'],['p','Ütés helye',0,100,40,1,v=>v+' %']],
+ V=>({S:MS(OMs(V.o,V.f,PM(V.o,V.p),PM(V.o,V.p),0),DEF),T:2.5}));
+document.querySelectorAll('#tabs button').forEach(b=>b.addEventListener('click',()=>setTimeout(()=>VZ.forEach(v=>v.r()),0)));
+(function(){const R=document.documentElement,B=$('thm'),L={light:'világos',dark:'sötét'},O=['light','dark'];let m='light';try{m=localStorage.getItem('thm2')||'light'}catch(e){}
+function ap(){R.setAttribute('data-theme',m);B.textContent='🌓 Téma: '+L[m];setTimeout(()=>{draw();VZ.forEach(v=>v.r())},0)}
+B.onclick=()=>{m=O[(O.indexOf(m)+1)%2];try{localStorage.setItem('thm2',m)}catch(e){}ap()};ap()})();addEventListener('resize',()=>VZ.forEach(v=>v.r()));
+/* ===== Játékmódok: lenyomás, vonás, kalapács (modális szimulátor) ===== */
+const SH=(o,n,x)=>o=='s'?sin(n*PI*x):o=='m'?J(MB[n-1][0],MB[n-1][1]*x)/J(MB[n-1][0]+1,MB[n-1][1]):phi('b',n,x),
+TRM=v=>.05*Math.pow(120,v/100),
+rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+function PLY(V){const o=V.o,xf=o=='s'&&V.ls!='1'?V.xf/100:0,ab=v=>o=='s'?.02+.96*v/100:o=='m'?.95*v/100:v/100,
+ rl=x=>o=='s'?Math.min(.99,Math.max(.01,(x-xf)/(1-xf))):x;
+ return{o,xf,f1:V.f/(1-xf),pa:ab(V.p),qa:ab(V.q),da:ab(V.d),p:rl(ab(V.p)),q:rl(ab(V.q)),d:rl(ab(V.d))}}
+function LOCK(M,kk){const mx=Math.max(...M.map(o=>Math.abs(o.ud))),A=[],R=[];
+M.forEach(o=>{if(Math.abs(o.ud)>1e-4*mx)A.push(o);else{o.cm=[[o.n,1]];R.push(o)}});if(A.length<2)return M;
+const L=A.map(o=>o.w*o.w),u=A.map(o=>o.ud),g=l=>{let s=1/kk;for(let i=0;i<A.length;i++)s+=u[i]*u[i]/(L[i]-l);return s};
+for(let j=0;j<A.length-1;j++){let a=L[j],b=L[j+1];const e=1e-9*(b-a);a+=e;b-=e;for(let it=0;it<50;it++){const c=(a+b)/2;if(g(c)<0)a=c;else b=c}
+ const l=(a+b)/2,c=A.map((o,i)=>u[i]/(L[i]-l)),nm=Math.hypot(...c),o={w:Math.sqrt(l),cm:[]};let up=0,uq=0,sg=0,ud=0;
+ A.forEach((q,i)=>{const k=c[i]/nm;up+=k*q.up;uq+=k*q.uq;ud+=k*q.ud;sg+=k*k*q.s0;o.cm.push([q.n,k])});
+ o.f=o.w/TAU;o.up=up;o.uq=uq;o.s0=sg;o.ud=ud;o.e=0;R.push(o)}
+R.sort((a,b)=>a.f-b.f);R.forEach((o,i)=>{o.n=i+1});return R}
+function MOD(V,fs){const P=PLY(V),fmax=Math.min(10000,.45*fs);let M=[];
+ if(P.o=='s'){for(let n=1;n*P.f1<fmax&&n<=400;n++)M.push({n,f:n*P.f1})}
+ else if(P.o=='m'){for(let n=1;n<=10;n++)M.push({n,f:P.f1*MB[n-1][1]/MB[0][1]})}
+ else{for(let n=1;n<=8;n++)M.push({n,f:P.f1*(bnv('b',n)/bnv('b',1))**2})}
+ M=M.filter(o=>o.f<fmax);const T=V.T,b=V.b/100;
+ M.forEach(o=>{const r=o.f/P.f1;o.w=TAU*o.f;o.s0=(6.9078/T)*(1+b*(r*r-1));o.up=SH(P.o,o.n,P.p);o.uq=SH(P.o,o.n,P.q);o.ud=SH(P.o,o.n,P.d);o.e=V.k*o.ud*o.ud});if(V.ls=='1')M=LOCK(M,(window.KSG||7e6)*Math.cbrt(.01*Math.pow(1e4,V.ff/100)));
+ return{P,M}}
+function PULSE(fs,V){const p=V.pe,tau=1e-3*TRM(V.tr)*Math.pow(V.mh,1/(p+1))*Math.pow(V.vh,-(p-1)/(p+1)),g=2*p/(p+1),n=Math.max(2,Math.round(tau*fs)),F=new Float64Array(n),R=rng(12345),al=Math.exp(-TAU*6000/fs),sc=Math.sqrt((1+al)/(1-al)),rho=V.ru/100*1.2;let xi=0,S=0;
+ for(let k=0;k<n;k++){xi=al*xi+(1-al)*(R()*3.4641-1.7320);const e=Math.pow(Math.sin(PI*(k+.5)/n),g);F[k]=e*Math.max(0,1+rho*sc*xi);S+=F[k]}
+ for(let k=0;k<n;k++)F[k]/=S/fs;return{F,tau}}
+function SIM(V,fs){const{P,M}=MOD(V,fs),dt=1/fs,m=M.filter(o=>o.w<.9*PI*fs),n=m.length,K=V.k>0,td=K&&V.td>0?Math.round(V.td/1000*fs):0,e=V.e;
+ const CF=sel=>{const a={c11:new Float64Array(n),c12:new Float64Array(n),c21:new Float64Array(n),c22:new Float64Array(n),bx:new Float64Array(n),bv:new Float64Array(n)};
+  m.forEach((o,i)=>{const w=o.w,s=Math.min(o.s0+(sel?o.e:0),.95*w),wd=Math.sqrt(w*w-s*s),th=wd*dt,E=Math.exp(-s*dt),c=Math.cos(th),sn=Math.sin(th);
+   a.c11[i]=E*(c+s/wd*sn);a.c12[i]=E*sn/wd;a.c21[i]=-E*w*w/wd*sn;a.c22[i]=E*(c-s/wd*sn);a.bx[i]=(1-a.c11[i])/(w*w);a.bv[i]=E*sn/wd});return a},
+ A=CF(K&&td==0),B=CF(K),up=m.map(o=>o.up),uq=m.map(o=>o.uq),x=new Float64Array(n),v=new Float64Array(n);let pulse=null,N,y;
+ const tail=Math.min(4,Math.max(1,V.T)),useV=V.out=='v';
+ const hc=e=='h'&&V.hc=='1';let yh=0,vhm=V.vh,Kc=0,lf=0;const rec=[],pc=V.pe;if(hc){const q=pc+1;let B=0;for(let i=0;i<400;i++){const s=(i+.5)/400;B+=2*s/Math.sqrt(1-Math.pow(1-s*s,q))/400}const dm=TRM(V.tr)*1e-3/(2*B);Kc=q/(2*Math.pow(dm,q))}
+ if(e=='h'){pulse=hc?null:PULSE(fs,V);N=Math.floor(fs*Math.min(7,Math.max(1.5,V.T*1.2)))}
+ else if(e=='p'){N=Math.floor(fs*Math.min(7,Math.max(1.5,V.T*1.2)));const t0=TRM(V.tr)*1e-3,fc=.5/t0;m.forEach((o,i)=>{x[i]=up[i]/(o.w*o.w)/(1+(o.f/fc)**2)})}
+ else N=Math.floor(fs*(V.hold+tail));
+ y=new Float32Array(N);
+ let H=0;if(e=='b')for(let i=0;i<n;i++)H+=up[i]*up[i]*A.bv[i];
+ const bb=P.p,muD=.3,muS=muD+V.mu,v0=.15,vb=V.vb,F0=1/(H*.09*.3||1),Fn0=V.pf*F0,att=Math.max(1,V.at/1000*fs),hold=V.hold*fs,rel=.02*fs;
+ const mu=a=>muD+(muS-muD)/(1+a/v0);
+ for(let k=0;k<N;k++){const C=k>=td?B:A;let F=0;
+  if(e=='h'){if(hc){let yf=0,Hx=0;for(let i=0;i<n;i++){yf+=up[i]*(C.c11[i]*x[i]+C.c12[i]*v[i]);Hx+=up[i]*up[i]*C.bx[i]}
+   const d0=yh+vhm*dt-yf,S=dt*dt/V.mh+Hx;if(d0>0){let a=0,b=Kc*Math.pow(d0,pc);for(let it=0;it<40;it++){const mid=(a+b)/2;if(mid>Kc*Math.pow(Math.max(0,d0-S*mid),pc))b=mid;else a=mid}F=(a+b)/2}
+   yh+=vhm*dt-dt*dt/V.mh*F;vhm-=dt/V.mh*F;if(F>0){rec.push(F);lf=k}else if(rec.length&&k-lf>.03*fs)yh=-1e3}
+  else if(pulse&&k<pulse.F.length)F=pulse.F[k]}
+  else if(e=='b'){let vf=0;for(let i=0;i<n;i++)vf+=up[i]*(C.c21[i]*x[i]+C.c22[i]*v[i]);
+   const Hh=H,ramp=Math.min(1,k/att)*(k<hold?1:Math.max(0,1-(k-hold)/rel)),Fn=Fn0*ramp;
+   if(Fn>0){const Fst=(vb-vf)/Hh;if(Math.abs(Fst)<=muS*Fn)F=Fst;else{const s=Math.sign(vf-vb);let lo=-s*muS*Fn,hi=0,a=Math.min(lo,hi),b=Math.max(lo,hi);
+     for(let it=0;it<30;it++){const mid=(a+b)/2,h=mid+s*Fn*mu(Math.abs(vf-vb+Hh*mid));if(s*h>0)b=mid;else a=mid}
+     F=(a+b)/2}}}
+  let o=0;
+  for(let i=0;i<n;i++){const xi=C.c11[i]*x[i]+C.c12[i]*v[i]+C.bx[i]*up[i]*F,vi=C.c21[i]*x[i]+C.c22[i]*v[i]+C.bv[i]*up[i]*F;x[i]=xi;v[i]=vi;o+=uq[i]*(useV?vi:xi)}
+  y[k]=o}
+ if(hc)pulse={F:Float64Array.from(rec),tau:rec.length/fs,coupled:1};
+ let pk=0;for(let i=0;i<N;i++)pk=Math.max(pk,Math.abs(y[i]));const kk=.5/(pk||1);for(let i=0;i<N;i++){y[i]*=kk;if(i>N-1000)y[i]*=(N-i)/1000}
+ return{y,pulse,P,m,H,Fn0,muS,muD}}
+function FFT(re,im){const n=re.length;for(let i=1,j=0;i<n;i++){let b=n>>1;for(;j&b;b>>=1)j^=b;j^=b;if(i<j){[re[i],re[j]]=[re[j],re[i]];[im[i],im[j]]=[im[j],im[i]]}}
+ for(let l=2;l<=n;l<<=1){const a=-TAU/l,wr=Math.cos(a),wi=Math.sin(a);for(let i=0;i<n;i+=l){let cr=1,ci=0;for(let j=0;j<l/2;j++){const ur=re[i+j],ui=im[i+j],vr=re[i+j+l/2]*cr-im[i+j+l/2]*ci,vi=re[i+j+l/2]*ci+im[i+j+l/2]*cr;re[i+j]=ur+vr;im[i+j]=ui+vi;re[i+j+l/2]=ur-vr;im[i+j+l/2]=ui-vi;const t=cr*wr-ci*wi;ci=cr*wi+ci*wr;cr=t}}}}
+function SPC(y,fs,t0){const N=32768,re=new Float64Array(N),im=new Float64Array(N),s=Math.floor((t0||0)*fs);for(let i=0;i<N&&s+i<y.length;i++)re[i]=y[s+i]*(.5-.5*Math.cos(TAU*i/N));FFT(re,im);const h=N/2,d=new Float64Array(h);let mx=1e-30;for(let i=0;i<h;i++){d[i]=Math.hypot(re[i],im[i]);mx=Math.max(mx,d[i])}for(let i=0;i<h;i++)d[i]=20*Math.log10(d[i]/mx+1e-9);return{d,df:fs/N}}
+
+/* ===== Játékmódok: felület ===== */
+(function(){
+const PFM=v=>.01*Math.pow(1000,v/100),posS=a=>Math.round((a-.02)/.96*100),VV=V=>({...V,pf:PFM(V.pf)}),
+PXT=(o,v)=>nf((o=='s'?.02+.96*v/100:o=='m'?.95*v/100:v/100)*100,0)+' %',
+ROOT=()=>document.querySelector('#p-play .viz');let LAST=null;
+const cs=[
+['o','Tárgy','s',[['s','Húr'],['b','Szabad–szabad rúd'],['m','Kör membrán']],'s'],
+['e','Gerjesztés','s',[['h','Kalapács (ütés)'],['p','Pengetés'],['b','Vonás']],'h'],
+['out','Mit hallgatsz','s',[['x','kitérés'],['v','sebesség']],'x'],
+['f','Alapfrekvencia (üres tárgy)',80,1000,220,1,v=>v+' Hz'],
+['T','T60 az alaphangon',.2,6,3,.1,v=>nf(+v,1)+' s'],
+['b','Magas módusok féke (b)',0,100,20,1,v=>v+' %'],
+['p','Gerjesztés helye p',0,100,13,1,(v,V)=>PXT(V.o,v)],
+['q','Hallgatás helye q',0,100,70,1,(v,V)=>PXT(V.o,v)],
+['hc','Kalapács modellje','s',[['0','előírt pulzus (τ képletből)'],['1','csatolt: m·ÿ = −K·δᵖ (számolt)']],'0'],
+['tr','Keménység: érintkezési idő τ₀',0,100,71,1,v=>nf(TRM(v),2)+' ms'],
+['pe','Anyag nemlinearitása p',1,4,2.5,.1,v=>nf(+v,1)],
+['mh','Kalapács tömege',.2,5,1,.1,v=>nf(+v,1)+'×'],
+['vh','Ütés sebessége',.2,4,1,.1,v=>nf(+v,1)+'×'],
+['ru','Felület érdessége',0,100,10,1,v=>v+' %'],
+['pf','Vonóerő',0,100,39,1,v=>'φ = '+nf(PFM(v),2)],
+['vb','Vonósebesség',.2,4,1,.1,v=>nf(+v,1)+'×'],
+['mu','Gyanta: μs − μd',.05,.6,.3,.01,v=>nf(+v,2)],
+['at','Vonó felfutása',5,500,60,5,v=>v+' ms'],
+['hold','Vonás hossza',.5,4,1.5,.1,v=>nf(+v,1)+' s'],
+['ls','Lefogás/megfogás módja','s',[['0','húr: xf rövidítés · d: tompítás (κ)'],['1','merev lefogás d helyen (módusok újraszámolva)']],'0'],
+['ff','Lefogás ereje F_f',0,100,70,1,v=>nf(.01*Math.pow(1e4,v/100),2)+' N → k̃ = '+((window.KSG||7e6)*Math.cbrt(.01*Math.pow(1e4,v/100))).toExponential(1)+' 1/s²'],
+['xf','Lefogás helye (húr; 0 = üres)',0,60,0,.1,(v,V)=>nf(+v,1)+' % → f₁ = '+nf(V.f/(1-v/100),0)+' Hz'],
+['d','Tompító helye d',0,100,50,1,(v,V)=>PXT(V.o,v)],
+['k','Tompítás erőssége κ',0,600,0,10,v=>v+' 1/s'],
+['td','Tompító rákerül',0,1500,0,50,v=>v+' ms'],
+['n','Ábrázolt módus',1,12,1]],
+DF={};cs.forEach(c=>DF[c[0]]=c[2]=='s'?c[4]:c[4]);
+const GRP={h:['hc','tr','pe','mh','vh','ru'],p:['tr'],b:['pf','vb','mu','at','hold']};
+function vis(id,on){const D=ROOT();if(!D)return;const e=D.querySelector('[data-i="'+id+'"]'),r=e&&(e.closest('.ctl')||e.closest('label'));if(r)r.style.display=on?'':'none'}
+function drawGeo({g,W,H},V,P,M,n){g.clearRect(0,0,W,H);const x0=34,x1=W-24,mid=H/2+8,A=H/2-40,X=a=>x0+(x1-x0)*a,o=P.o;
+ if(P.xf>0){g.save();g.setLineDash([5,4]);LN(g,[[X(0),mid],[X(P.xf),mid]],C.gr,3);g.restore();LN(g,[[X(P.xf),mid-20],[X(P.xf),mid+20]],C.ink,5);TX(g,'ujj (lefogás)',X(P.xf)-30,mid+36)}
+ LN(g,[[X(P.xf),mid],[X(1),mid]],C.ink,3);
+ const mm=M[n-1],sh=x=>mm.cm?mm.cm.reduce((s,[k,c])=>s+c*SH(o,k,x),0):SH(o,mm.n,x);let mx=1e-9;for(let i=0;i<=200;i++)mx=Math.max(mx,Math.abs(sh(i/200)));
+ const pts=[];for(let i=0;i<=200;i++){const r=i/200;pts.push([X(P.xf+(1-P.xf)*r),mid-sh(r)/mx*A])}LN(g,pts,C.dp,2);
+ DOT(g,X(P.pa),mid,6,C.pk);TX(g,'p',X(P.pa)-3,mid+20);DOT(g,X(P.qa),mid,6,C.dp);TX(g,'q',X(P.qa)-3,mid+20);
+ if(V.k>0||V.ls=='1'){g.fillStyle=C.ink;g.fillRect(X(P.da)-5,mid-5,10,10);TX(g,'d',X(P.da)-3,mid-12)}
+ TX(g,o=='m'?'középpont':'0',x0-6,H-6);TX(g,o=='m'?'perem':'1',x1-12,H-6);
+ TX(g,n+'. módus alakja (kék); ● p: gerjesztés, ● q: hallgatás'+(V.k>0?', ■ d: tompító':''),6,13)}
+function drawExc({g,W,H},V,P,M,info){g.clearRect(0,0,W,H);
+ if(V.e=='h'){const cp=V.hc=='1'&&LAST&&LAST.pulse&&LAST.pulse.coupled,dt=cp?1/LAST.fs:1/48000,pl=cp?LAST.pulse:PULSE(48000,V),F=pl.F,n=F.length,w1=W*.42,tmax=n*dt*1.1,mx=Math.max(...F);
+  LN(g,[[10,H-18],[w1,H-18]],C.ink,1);LN(g,F.map((f,k)=>[10+(w1-10)*(k*dt)/tmax,H-18-f/mx*(H-44)]),C.pk,2.5);TX(g,'0',8,H-4);TX(g,nf(tmax*1000,2)+' ms',w1-52,H-4);TX(g,'erőpulzus F(t)',10,13);
+  const x2=w1+34,w2=W-10,fm=10000,Y=[];let f3=null;for(let i=0;i<=120;i++){const f=fm*i/120;let re=0,im=0;for(let k=0;k<n;k++){const a=TAU*f*(k+.5)*dt;re+=F[k]*Math.cos(a)*dt;im+=F[k]*Math.sin(a)*dt}const db=20*l10(Math.hypot(re,im)+1e-9);Y.push(db);if(f3===null&&db<-3)f3=f}
+  LN(g,[[x2,H-18],[w2,H-18]],C.ink,1);M.forEach(o=>{if(o.f<fm){const X=x2+(w2-x2)*o.f/fm;LN(g,[[X,H-18],[X,H-24]],C.gr,1)}});
+  LN(g,Y.map((d,i)=>[x2+(w2-x2)*i/120,H-18-(Math.max(-40,d)+40)/40*(H-44)]),C.dp,2.5);TX(g,'0 Hz',x2-4,H-4);TX(g,'10 kHz',w2-38,H-4);TX(g,'spektrum (dB): ',x2,13);
+  info.push('τ = '+nf(pl.tau*1000,2)+' ms ('+(cp?'számolt, csatolt kalapács–tárgy, utolsó lejátszás':'képletből')+') · a pulzus spektruma '+(f3?'kb. '+nf(f3,0)+' Hz-nél esik −3 dB-t':'10 kHz-ig nem esik −3 dB-t'))}
+ else if(V.e=='p'){const fc=.5/(TRM(V.tr)*1e-3),Mx=M.length,vs=[];let mx=1e-9;for(let i=0;i<=200;i++){const r=i/200;let s=0;M.forEach(m=>{s+=m.up*SH(P.o,m.n,r)/(m.w*m.w)/(1+(m.f/fc)**2)});vs.push(s);mx=Math.max(mx,Math.abs(s))}
+  LN(g,[[10,H/2],[W-10,H/2]],C.gr,1);LN(g,vs.map((s,i)=>[10+(W-20)*i/200,H/2-s/mx*(H/2-30)]),C.pk,2.5);DOT(g,10+(W-20)*P.p,H/2-(vs[Math.round(P.p*200)]||0)/mx*(H/2-30),5,C.ink);
+  TX(g,'kezdeti lehajlás: x_n(0) = u_n(p)/ω_n² (a pengető keménysége lágyítja)',10,13);info.push('pengetés: a módusok a statikus lehajlásból indulnak, pengető-vágás ≈ '+nf(fc,0)+' Hz')}
+ else{const vb=V.vb,mS=.3+V.mu,mD=.3,v0=.15,mu=a=>mD+(mS-mD)/(1+Math.abs(a)/v0),vm=3,X=v=>10+(W-20)*(v+vm)/(2*vm),Yy=m=>H-20-(m/.9)*(H-46);
+  LN(g,[[10,H-20],[W-10,H-20]],C.ink,1);LN(g,[[X(0),H-20],[X(0),20]],C.gr,1);  const c1=[],c2=[];for(let i=0;i<=120;i++){const v=vm*i/120;c1.push([X(v),Yy(mu(v))]);c2.push([X(-v),Yy(mu(v))])}LN(g,c1,C.pk,2.5);LN(g,c2,C.pk,2.5);
+  DOT(g,X(vb),Yy(mu(vb)),5,C.dp);TX(g,'μ(v_rel): tapadás μs = '+nf(mS,2)+', csúszás μd = '+nf(mD,2),10,13);TX(g,'−v_b',X(-vb)-12,H-6);TX(g,'0',X(0)-3,H-6);TX(g,'+v_b',X(vb)-10,H-6);
+  if(P.o!='s')info.push('vonás rúdon vagy membránon: kísérleti eset, a Helmholtz-sáv csak húrra érvényes');
+  else{const beta=Math.min(P.p,1-P.p),pmin=.049*vb,pmax=.034*vb/beta*Math.pow(V.mu/.3,-.35);
+   info.push('vonás β = '+nf(beta,2)+': Helmholtz-sáv kb. φ = '+nf(pmin,2)+' … '+nf(pmax,2)+', most φ = '+nf(V.pf,2)+' → '+(pmax<pmin?'itt nincs Helmholtz-sáv':V.pf<pmin?'túl kicsi erő (karcos, felületi hang)':V.pf>pmax?'túl nagy erő (reccsenő)':'Helmholtz-mozgás várható'))}}}
+function drawT60({g,W,H},V,P,M){g.clearRect(0,0,W,H);const fm=Math.min(10000,Math.max(...M.map(o=>o.f))*1.05),X=f=>34+(W-44)*f/fm,Yt=t=>H-18-(Math.min(1,Math.max(-2.3,l10(t)))+2.3)/3.3*(H-36);
+ [.01,.1,1,10].forEach(t=>{LN(g,[[34,Yt(t)],[W-10,Yt(t)]],C.gr,1);TX(g,t<1?nf(t*1000,0)+' ms':nf(t,0)+' s',2,Yt(t)-2)});
+ LN(g,[[34,H-18],[W-10,H-18]],C.ink,1);TX(g,'0 Hz',30,H-4);TX(g,nf(fm,0)+' Hz',W-62,H-4);
+ M.forEach(o=>{const t0=6.9078/Math.min(o.s0+(V.k>0&&V.td==0?o.e:0),.95*o.w),t1=6.9078/Math.min(o.s0+o.e,.95*o.w);if(V.k>0)LN(g,[[X(o.f),Yt(t0)],[X(o.f),Yt(t1)]],C.gr,1.5);DOT(g,X(o.f),Yt(6.9078/o.s0),3.5,C.dp);if(V.k>0)DOT(g,X(o.f),Yt(t1),3.5,C.pk)});
+ TX(g,'T60 módusonként (log); kék: tompítás nélkül, rózsaszín: a tompítóval',38,13)}
+function drawWave({g,W,H},V,P,M){g.clearRect(0,0,W,H);if(!LAST){TX(g,'Nyomd meg a ▶ gombot: a hullámforma és a spektrum a lejátszott hangból készül.',10,H/2);return}
+ const y=LAST.y,N=y.length,fs=LAST.fs,h1=H*.5-8,m1=h1/2+4;LN(g,[[0,m1],[W,m1]],C.gr,1);
+ for(let x=0;x<W;x++){const a=Math.floor(x/W*N),b=Math.max(a+1,Math.floor((x+1)/W*N));let lo=0,hi=0;for(let i=a;i<b;i++){const v=y[i];if(v<lo)lo=v;if(v>hi)hi=v}LN(g,[[x,m1-hi*(h1/2)*1.9],[x,m1-lo*(h1/2)*1.9]],C.pk,1)}
+ TX(g,'teljes hang ('+nf(N/fs,1)+' s)',6,13);
+ const t0=LAST.t0w,s0=Math.floor(t0*fs),L=Math.floor(.04*fs),m2=H*.75+8;LN(g,[[0,m2],[W,m2]],C.gr,1);
+ LN(g,Array.from({length:W},(_,x)=>[x,m2-(y[Math.min(N-1,s0+Math.floor(x/W*L))]||0)*(H*.25-12)*1.9]),C.dp,1.6);TX(g,'40 ms-os részlet '+nf(t0,2)+' s-tól',6,H*.5+8)}
+function drawSpec({g,W,H},V,P,M){g.clearRect(0,0,W,H);if(!LAST){return}
+ const S=LAST.S,fm=10000,X=f=>10+(W-20)*f/fm,Yd=d=>H-18-(Math.max(-90,d)+90)/90*(H-36);
+ M.forEach(o=>{if(o.f<fm)LN(g,[[X(o.f),H-18],[X(o.f),30]],C.gr,1)});LN(g,[[10,H-18],[W-10,H-18]],C.ink,1);
+ const pts=[];for(let i=0;i*S.df<fm;i++)pts.push([X(i*S.df),Yd(S.d[i])]);LN(g,pts,C.pk,1.5);
+ [0,2000,4000,6000,8000,10000].forEach(f=>TX(g,f?f/1000+' kHz':'0',X(f)-(f?14:0),H-4));TX(g,'a lejátszott hang spektruma (dB; szürke vonalak: a módusok frekvenciái)',10,13)}
+function draw(cv,V,t,set){const W2=VV(V),{P,M}=MOD(W2,48000),n=Math.min(V.n,M.length),info=[],o=V.o,e=V.e;
+ vis('xf',o=='s'&&V.ls!='1');vis('ff',V.ls=='1');GRP.h.concat(GRP.b).forEach(id=>vis(id,false));GRP[e].forEach(id=>vis(id,true));
+  drawGeo(cv[0],V,P,M,n);drawExc(cv[1],W2,P,M,info);drawT60(cv[2],W2,P,M);drawWave(cv[3],W2,P,M);drawSpec(cv[4],W2,P,M);
+ const m=M[n-1],u=x=>nf(m.cm?m.cm.reduce((s,[k,c])=>s+c*SH(o,k,x),0):SH(o,m.n,x),2),Ts=6.9078/m.s0,Te=6.9078/Math.min(m.s0+m.e,.95*m.w);
+ const lost=M.filter(q=>Math.abs(q.up*q.uq)<1e-3).map(q=>q.n),dead=V.k>0?M.filter(q=>q.e>q.s0*4).map(q=>q.n):[];
+ set('f₁ = '+nf(P.f1,1)+' Hz · '+M.length+' módus 10 kHz alatt\n'+n+'. módus: f = '+nf(m.f,0)+' Hz, u(p) = '+u(P.p)+', u(q) = '+u(P.q)+(V.k>0?', u(d) = '+u(P.d):'')+', T60 = '+nf(Ts,2)+' s'+(V.k>0?' → '+nf(Te,3)+' s a tompítóval':'')+'\n'+info.join('\n')+(LAST?'\nutolsó lejátszás: '+(LAST.e=='b'&&P.o=='s'?'harmonikus energia '+nf(LAST.harm*100,0)+' % (6 kHz alatt), ':'')+'számolás '+LAST.ms+' ms':'')+'\nkimarad (u(p)·u(q) ≈ 0): '+(lost.length?lost.slice(0,16).join(', ')+(lost.length>16?' …':''):'nincs')+(V.k>0?'\nerősen fékezett módusok (σ nő > 5×): '+(dead.length?dead.slice(0,16).join(', ')+(dead.length>16?' …':''):'nincs'):''))}
+function snd(V){const c=actx(),fs=c.sampleRate,W2=VV(V),t=performance.now(),r=SIM(W2,fs);r.fs=fs;r.t0w=W2.e=='b'?W2.hold*.4:0;r.S=SPC(r.y,fs,r.t0w);LAST=r;
+ const S=r.S,f1=r.P.f1;let hs=0,tot=0;for(let i=0;i*S.df<6000;i++){const a=Math.pow(10,S.d[i]/10);tot+=a;const nn=Math.round(i*S.df/f1);if(nn>=1&&Math.abs(i*S.df-nn*f1)<.03*f1)hs+=a}
+ LAST.harm=hs/tot;LAST.e=W2.e;LAST.ms=Math.round(performance.now()-t);ME.r();return r.y}
+viz(document.querySelector('#p-play>.card'),'Játékmódok: lenyomás, vonás, kalapács','Válassz tárgyat és gerjesztést, majd nyomd meg a ▶ gombot. A felső három ábra azonnal követi a beállításokat (geometria, gerjesztés, lecsengési idők), az alsó kettő a lejátszott hangból készül. A gyorsgombok jellegzetes eseteket töltenek be: flageolet, tompítás, lefogás, vonás három erővel, xilofonlap csomóponton.',cs,
+ (cv,V,t,set)=>draw(cv,V,t,set),{snd,btn:'▶ Lejátszás',h:[170,150,150,170,170]});
+const ME=VZ[VZ.length-1],D=ME.d;
+/* címsorok, gyorsgombok */
+const hd=(id,s)=>{const e=D.querySelector('[data-i="'+id+'"]'),r=e.closest('.ctl')||e.closest('label');r.insertAdjacentHTML('beforebegin','<h3 style="margin:14px 0 2px">'+s+'</h3>')};
+hd('p','Gerjesztés');hd('xf','Lenyomás és tompítás');hd('n','Ábra');
+const q=(a)=>posS(a),PR=[
+['Zongorahúr (kalapács)',{o:'s',e:'h',p:q(1/8),q:70,tr:71,pe:2.5,ru:10,k:0,xf:0,T:3}],
+['Pizzicato',{o:'s',e:'p',p:q(.3),tr:33,k:0,xf:0,T:1.2}],
+['Flageolet 1/2 (oktáv)',{o:'s',e:'p',p:q(.13),tr:33,d:q(.5),k:300,td:0,xf:0,T:3}],
+['Flageolet 1/3 (12-es)',{o:'s',e:'p',p:q(.13),tr:33,d:q(1/3),k:300,td:0,xf:0,T:3}],
+['Tenyérrel tompítva (híd közelében)',{o:'s',e:'p',p:q(.3),tr:33,d:q(.05),k:600,td:0,xf:0,T:3}],
+['Tompító lejön 400 ms-nál',{o:'s',e:'p',p:q(.3),tr:33,d:q(.12),k:600,td:400,xf:0,T:3}],
+['Lefogás: kvint (x_f = 1/3)',{o:'s',e:'p',xf:33.3,p:q(.6),q:80,tr:33,k:0,T:2}],
+['Csatolt kalapács (zongorahúr)',{o:'s',e:'h',hc:'1',p:q(1/8),q:70,tr:71,pe:2.5,mh:1,vh:1,k:0,xf:0,ls:'0',T:3}],
+['Húr: merev lefogás 1/4-nél (mindkét rész szól)',{o:'s',e:'p',p:q(.13),q:70,tr:33,d:q(.25),ls:'1',k:0,xf:0,T:3}],
+['Rúd: merev lefogás a csomónál (22 %)',{o:'b',e:'h',hc:'1',p:50,q:20,tr:43,pe:1.5,d:22,ls:'1',k:0,xf:0,T:2}],
+['Membrán: merev lefogás 50 %-nál',{o:'m',e:'h',p:40,q:60,tr:43,pe:1.5,ru:10,d:50,ls:'1',k:0,xf:0,T:2}],
+['Vonás: Helmholtz',{o:'s',e:'b',p:10,q:70,pf:39,vb:1,mu:.3,at:60,hold:1.5,k:0,xf:0,T:2,out:'x'}],
+['Vonás: túl nagy erő',{o:'s',e:'b',p:10,q:70,pf:67,vb:1,mu:.3,at:60,hold:1.5,k:0,xf:0,T:2,out:'x'}],
+['Vonás: túl kis erő',{o:'s',e:'b',p:10,q:70,pf:10,vb:1,mu:.3,at:60,hold:1.5,k:0,xf:0,T:2,out:'x'}],
+['Rúd: megfogás a csomónál (22,4 %)',{o:'b',e:'h',p:50,q:20,tr:43,pe:1.5,ru:25,d:22,k:400,td:0,xf:0,T:2}],
+['Rúd: megfogás középen',{o:'b',e:'h',p:50,q:20,tr:43,pe:1.5,ru:25,d:50,k:400,td:0,xf:0,T:2}],
+['Membrán: ujj a közepén',{o:'m',e:'h',p:40,q:60,tr:43,pe:1.5,ru:10,d:0,k:400,td:0,xf:0,T:2}]];
+const bar=document.createElement('div');bar.className='pre';
+PR.forEach(([s,v])=>{const b=document.createElement('button');b.type='button';b.textContent=s;b.onclick=()=>{const all=Object.assign({},DF,v);Object.keys(all).forEach(id=>{const e=D.querySelector('[data-i="'+id+'"]');if(e)e.value=all[id]});D.dispatchEvent(new Event('input',{bubbles:true}))};bar.appendChild(b)});
+const MAT=[['Puha filc',86,3,5],['Kemény filc',71,2.5,10],['Bőr',58,2,15],['Fa',43,1.5,25],['Műanyag',34,1.5,10],['Fém',15,1.5,0]],mb=document.createElement('div');mb.className='pre';mb.innerHTML='<b style="font-size:13px;align-self:center">Kalapács anyaga:</b>';
+MAT.forEach(([s,tr,pe,ru])=>{const b=document.createElement('button');b.type='button';b.textContent=s;b.onclick=()=>{[['e','h'],['tr',tr],['pe',pe],['ru',ru]].forEach(([id,v])=>{D.querySelector('[data-i="'+id+'"]').value=v});D.dispatchEvent(new Event('input',{bubbles:true}))};mb.appendChild(b)});
+D.querySelector('.intuition').after(mb);D.querySelector('.intuition').after(bar);
+const bx=D.querySelector('.box');bx.style.whiteSpace='pre-line';
+})();
+(function(){const MT=[['acél',200,7850,.3],['alumínium',70,2700,.33],['bronz',105,8800,.34],['juhar',12,650,.35],['üveg',70,2500,.22],['nylon',3,1150,.4]],g=x=>x.toPrecision(3).replace('.',','),
+Bp=q=>{let B=0;for(let i=0;i<400;i++){const s=(i+.5)/400;B+=2*s/Math.sqrt(1-Math.pow(1-s*s,q))/400}return B};
+viz(document.getElementById('phys'),'Fizikai kalkulátor','Válassz tárgyat és anyagot, majd kalapácsot, pengetést, vonást és lefogást. Alul minden közbenső változó kiíródik SI-egységben. Az „Átvitel” gomb beállítja a Játékmódok fül csúszkáit (alaphang, T60, kalapács τ₀ és kitevője, lefogó merevség, lefogás ereje).',
+[['o','Tárgy','s',[['s','húr'],['b','rúd'],['m','membrán'],['l','lemez']],'s'],['mt','Anyag','s',MT.map((m,i)=>[i,m[0]]),0],
+['L','L / R [mm]',50,1500,650,1],['d','d / h [mm]',.1,30,.8,.1],['w','b (rúd szélessége) [mm]',5,60,30,1],['T','T [N] (húr) vagy T_s [N/m] (membrán)',1,2000,70,1],['eta','η [×10⁻⁴]',1,300,10,1],
+['hm','Kalapács','s',[['s','acél (Hertz)'],['w','fa (Hertz)'],['f','kemény filc'],['p','puha filc']],'f'],['mh','m_h [g]',.5,200,10,.5],['vh','v_h [m/s]',.1,5,1,.1],['Rh','R_h [mm]',1,30,5,1],
+['p','p (gerjesztés helye) [% L]',2,50,13,1],['Fp','Pengetőerő F_p [N]',.1,5,1,.1],['bt','β (vonó–híd) [%]',2,30,10,1],['vb','v_b [m/s]',.05,.5,.2,.01],['mu','μs−μd',.05,.6,.3,.01],
+['fm','Lefogó','s',[['f','ujjbegy (K_f = 3·10⁴)'],['m','fém bund (acél, R = 0,5 mm)']],'f'],['Ff','Lefogás ereje F_f [N]',.1,20,3,.1]],
+(cv,V,t,set)=>{const m=MT[+V.mt],E=m[1]*1e9,rho=m[2],nu=m[3],L=V.L/1e3,d=V.d/1e3,w=V.w/1e3,eta=V.eta*1e-4,T=V.T,p=V.p/100,o=[];let f1,mass,mn,Z=0,mu=0;
+ if(V.o=='s'){const S=PI*d*d/4;mu=rho*S;Z=Math.sqrt(T*mu);f1=Math.sqrt(T/mu)/(2*L);mass=mu*L;mn=mass/2;o.push('μ = ρS = '+g(mu)+' kg/m, Z₀ = √(Tμ) = '+g(Z)+' kg/s','f₁ = √(T/μ)/2L = '+g(f1)+' Hz, B = π³Ed⁴/(64TL²) = '+g(PI**3*E*d**4/(64*T*L*L)))}
+ else if(V.o=='b'){const A=w*d,I=w*d**3/12;f1=22.373/(2*PI*L*L)*Math.sqrt(E*I/(rho*A));mass=rho*A*L;mn=mass/2;o.push('A = bh = '+g(A)+' m², I = bh³/12 = '+g(I)+' m⁴','f₁ = (4,730²/2πL²)√(EI/ρA) = '+g(f1)+' Hz')}
+ else if(V.o=='m'){const ss=rho*d;f1=2.405/(2*PI*L)*Math.sqrt(T/ss);mass=ss*PI*L*L;mn=mass/2;o.push('σ_s = ρh = '+g(ss)+' kg/m²','f₀₁ = 2,405/(2πR)·√(T_s/σ_s) = '+g(f1)+' Hz')}
+ else{const ss=rho*d,D=E*d**3/(12*(1-nu*nu));f1=5.25/(2*PI*L*L)*Math.sqrt(D/ss);mass=ss*PI*L*L;mn=mass/2;o.push('σ_s = ρh = '+g(ss)+' kg/m², D = Eh³/12(1−ν²) = '+g(D)+' N·m','f = (λ²/2πR²)√(D/σ_s) = '+g(f1)+' Hz (λ² ≈ 5,25)')}
+ const w1=2*PI*f1,s1=eta*w1/2,T60=6.9078/s1;o.push('m = '+g(mass*1e3)+' g, m_n ≈ m/2 = '+g(mn*1e3)+' g, M_eff(p) = m_n/u²','ω₁ = '+g(w1)+' 1/s, σ₁ = ηω₁/2 = '+g(s1)+' 1/s, T60 = '+g(T60)+' s, Q = '+g(1/eta));
+ let K,pe;const mh=V.mh/1e3,Rh=V.Rh/1e3;if(V.hm=='f'){K=4.5e9;pe=2.5}else if(V.hm=='p'){K=1e9;pe=3}else{const Eh=V.hm=='s'?200e9:12e9,nh=V.hm=='s'?.3:.35,Es=1/((1-nh*nh)/Eh+(1-nu*nu)/E);K=4/3*Es*Math.sqrt(Rh);pe=1.5;o.push('E* = '+g(Es/1e9)+' GPa')}
+ const q=pe+1,dm=Math.pow(q*mh*V.vh**2/(2*K),1/q),tau=2*Bp(q)*dm/V.vh;o.push('Kalapács: K = '+g(K)+' N/m^p, p_e = '+pe+', δ_m = '+g(dm*1e3)+' mm, F_max = '+g(K*Math.pow(dm,pe))+' N, τ = '+g(tau*1e3)+' ms (falra ütve)');
+ if(V.o=='s'){o.push('Pengetés: y₀ = F_p·p(1−p)L/T = '+g(V.Fp*p*(1-p)*L/T*1e3)+' mm','Vonás: F_N,max = 2Z₀v_b/(β(μs−μd)) = '+g(2*Z*V.vb/(V.bt/100*V.mu))+' N')}
+ const Kf=V.fm=='f'?3e4:4/3*(1/(2*(1-.09)/200e9))*Math.sqrt(5e-4),ks=1.5*Math.pow(Kf,2/3)*Math.cbrt(V.Ff),kn=ks/mn;o.push('Lefogás: K_f = '+g(Kf)+', k_s = (3/2)K_f^(2/3)F_f^(1/3) = '+g(ks)+' N/m, k̃ = k_s/m_n = '+g(kn)+' 1/s², f_c ≈ '+g(Math.sqrt(kn)/(2*PI))+' Hz');
+ V._r={f1,T60,tau,pe,kn,Ff:V.Ff};set(o.join('\n'));window._PH=V._r},{h:[]});
+const D=VZ[VZ.length-1].d,bb=document.createElement('button');bb.className='btn';bb.textContent='➡ Átvitel a Játékmódokba';D.querySelector('.box').style.whiteSpace='pre-line';D.querySelector('.box').before(bb);
+bb.onclick=()=>{const r=window._PH,P=document.querySelector('#p-play .viz');if(!r||!P)return;const cl=(x,a,b)=>Math.min(b,Math.max(a,x)),S=(i,v)=>{const e=P.querySelector('[data-i="'+i+'"]');if(e)e.value=v};
+ S('f',cl(r.f1,80,1000));S('T',cl(r.T60,.2,6));S('tr',cl(100*Math.log(r.tau*1e3/.05)/Math.log(120),0,100));S('pe',cl(r.pe,1,4));S('mh',1);S('vh',1);S('ff',cl(100*Math.log10(r.Ff/.01)/4,0,100));window.KSG=r.kn/Math.cbrt(r.Ff);P.dispatchEvent(new Event('input',{bubbles:true}));bb.textContent='✔ Átvitelre került (lásd Játékmódok)'};})();
+
+/* ===== Csatolt kalapács és lefogás: audio-vizuális ábrák ===== */
+function CH(V,fs){const dt=1/fs,p=V.p/100,S=MS(OMs('s',V.f,p,p,4e-4,24),{T:2,b:.2,fc:1e9}).filter(o=>o.w<.9*PI*fs),n=S.length,up=S.map(o=>sin(o.n*PI*p)),
+ c=S.map(o=>{const w=o.w,s=o.s,wd=Math.sqrt(w*w-s*s),th=wd*dt,E=Math.exp(-s*dt),C0=cos(th),Sn=sin(th),a=E*(C0+s/wd*Sn);return{a,b:E*Sn/wd,c:-E*w*w/wd*Sn,d:E*(C0-s/wd*Sn),x:(1-a)/(w*w)}}),
+ q=V.pe+1;let B=0;for(let i=0;i<400;i++){const s=(i+.5)/400;B+=2*s/Math.sqrt(1-Math.pow(1-s*s,q))/400}
+ const dm=V.tw*1e-3*V.vh/(2*B),K=q*V.mh*V.vh**2/(2*Math.pow(dm,q)),N=Math.floor(fs*V.T),x=new Float64Array(n),v=new Float64Array(n),y=new Float32Array(N),F=[];let yh=0,vh=V.vh,lf=0;
+ for(let k=0;k<N;k++){let yf=0,Hx=0;for(let i=0;i<n;i++){yf+=up[i]*(c[i].a*x[i]+c[i].b*v[i]);Hx+=up[i]*up[i]*c[i].x}
+  const d0=yh+vh*dt-yf,Sx=dt*dt/V.mh+Hx;let f=0;if(d0>0){let a=0,b=K*Math.pow(d0,V.pe);for(let it=0;it<40;it++){const m=(a+b)/2;if(m>K*Math.pow(Math.max(0,d0-Sx*m),V.pe))b=m;else a=m}f=(a+b)/2}
+  yh+=vh*dt-dt*dt/V.mh*f;vh-=dt/V.mh*f;if(f>0){F.push(f);lf=k}else if(F.length&&k-lf>.03*fs)yh=-1e3;
+  let o=0;for(let i=0;i<n;i++){const xi=c[i].a*x[i]+c[i].b*v[i]+c[i].x*up[i]*f,vi=c[i].c*x[i]+c[i].d*v[i]+c[i].b*up[i]*f;x[i]=xi;v[i]=vi;o+=sin(S[i].n*PI*.7)*xi}y[k]=o}
+ let pk=0,Fm=0,J=0;for(let i=0;i<N;i++)pk=Math.max(pk,Math.abs(y[i]));for(const f of F){Fm=Math.max(Fm,f);J+=f*dt}for(let i=0;i<N;i++)y[i]*=.5/(pk||1);
+ return{y,F,dt,tau:F.length*dt,Fm,e:J/(V.mh*V.vh)-1,S}}
+viz(CT(5),'Csatolt kalapács: az erő kiszámítva, nem előírva','A kalapács tömege és sebessége, a falra ütve mért τ és a kitevő adja az erőt. A rózsaszín az erőpulzus (számolt), a szaggatott függőleges vonal a falra ütés τ-ja. Nehéz kalapácsnál a tárgy engedése megnyújtja a pulzust. Lent a pulzus spektruma és a húr módusai. Az \u201eÜtés\u201d a teljes csatolt szimulációt játssza le.',
+ [['f','Alapfrekvencia f₁',80,1000,220,1,v=>v+' Hz'],['p','Ütés helye p',2,50,13,1,v=>v+' % L'],['mh','Kalapács/modális tömeg m_h',.02,10,.5,.02],['vh','Ütés sebessége v_h',.2,4,1,.1],['tw','τ falra ütve',.1,5,1.5,.1,v=>v+' ms'],['pe','Kitevő p_e',1,4,2.5,.1]],
+ ([a,b],V,t,set)=>{const r=CH({...V,T:.04},48000),{g,W,H}=a,tm=Math.max(r.tau,V.tw*1e-3)*1.4,F=r.F,mx=r.Fm||1;g.clearRect(0,0,W,H);LN(g,[[10,H-18],[W-4,H-18]],C.ink,1);
+  LN(g,F.map((f,k)=>[10+(W-14)*k*r.dt/tm,H-18-f/mx*(H-44)]),C.pk,2.5);VL(g,10+(W-14)*V.tw*1e-3/tm,10,H-18,C.dp);TX(g,'F(t), 0 … '+nf(tm*1000,1)+' ms',8,13);
+  const h=b.g,fm=10000,Y=[];h.clearRect(0,0,b.W,b.H);for(let i=0;i<=100;i++){const f=fm*i/100;let re=0,im=0;F.forEach((q,k)=>{const w=TAU*f*(k+.5)*r.dt;re+=q*Math.cos(w);im+=q*Math.sin(w)});Y.push(20*l10(Math.hypot(re,im)/(F.reduce((s,q)=>s+q,0)||1)+1e-9))}
+  LN(h,[[10,b.H-18],[b.W-4,b.H-18]],C.ink,1);r.S.forEach(o=>{if(o.f<fm){const X=10+(b.W-14)*o.f/fm;LN(h,[[X,b.H-18],[X,b.H-26]],C.gr,2)}});LN(h,Y.map((d,i)=>[10+(b.W-14)*i/100,b.H-18-(Math.max(-40,d)+40)/40*(b.H-44)]),C.dp,2.5);TX(h,'a pulzus spektruma (dB), 0 … 10 kHz',8,13);
+  set(`τ számolt = ${nf(r.tau*1000,2)} ms (falra ütve: ${nf(V.tw,1)} ms), F_max = ${nf(r.Fm,1)}, restitúció e = ${nf(r.e,2)}, tömegarány m_h/m_n = ${nf(V.mh,2)}`)},
+ {h:[130,120],snd:V=>{const r=CH({...V,T:2},actx().sampleRate);return r.y}});
+function LKV(V){const sh=(n,x)=>V.o=='s'?sin(n*PI*x):phi('b',n,x),d=V.d/100,M=[];
+ for(let n=1;n<=12;n++){const f=V.o=='s'?n*V.f:V.f*(bnv('b',n)/bnv('b',1))**2;M.push({n,f,w:TAU*f,s0:2.5,up:sh(n,.13),uq:sh(n,.7),ud:sh(n,d)})}
+ return{M,R:LOCK(M.map(o=>({...o})),Math.pow(10,V.lk))}}
+viz(CT(5),'Lefogás ereje: hogyan tolódnak el a frekvenciák','Fent a szabad tárgy módusai (szürke) és a lefogott tárgyé (rózsaszín). Húzd a k̃ csúszkát: kis merevségnél (gyenge nyomás) alig változik, nagynál ráülnek a merev lefogás értékeire. Lent az első három gyök a k̃ függvényében (a következő szabad módushoz viszonyítva), a függőleges vonal a most beállított érték. Húron d = 50 %-nál az első gyök a 2f₁.',
+ [['o','Tárgy','s',[['s','húr'],['b','szabad–szabad rúd']],'s'],['f','Alapfrekvencia f₁',80,1000,220,1,v=>v+' Hz'],['d','Lefogás helye d',2,98,33,1,v=>v+' %'],['lk','Lefogás merevsége lg k̃',3,11,8,.25,v=>'10^'+v+' 1/s²']],
+ ([a,b],V,t,set)=>{const{M,R}=LKV(V),fm=Math.max(...M.map(o=>o.f))*1.02;let{g,W,H}=a;g.clearRect(0,0,W,H);const X=f=>14+(W-24)*f/fm;TX(g,'szabad (szürke) → lefogva (rózsaszín)',6,13);
+  M.forEach(o=>LN(g,[[X(o.f),H*.3],[X(o.f),H*.3+24]],C.gr,3));R.forEach(o=>{if(o.f<fm*1.02)LN(g,[[X(o.f),H*.7],[X(o.f),H*.7+24]],C.pk,3)});
+  const sw=[];for(let l=3;l<=11;l+=.25)sw.push([l,LKV({...V,lk:l}).R.slice(0,3).map(o=>o.f)]);g=b.g;W=b.W;H=b.H;g.clearRect(0,0,W,H);const XL=l=>20+(W-30)*(l-3)/8;LN(g,[[20,H-16],[W-4,H-16]],C.ink,1);
+  [0,1,2].forEach(j=>LN(g,sw.map(([l,f])=>[XL(l),H-18-(H-34)*Math.min(1,(f[j]||0)/M[j+1].f)]),[C.pk,C.dp,C.ink][j],2.5));VL(g,XL(V.lk),8,H-16,C.gr);TX(g,'f̃ⱼ / f_{j+1} a lg k̃ függvényében (3 … 11)',6,13);
+  set('lefogott frekvenciák: '+R.slice(0,6).map(o=>nf(o.f,1)).join(', ')+' Hz; szabad: '+M.slice(0,6).map(o=>nf(o.f,1)).join(', ')+' Hz')},
+ {h:[110,120],snd:V=>{const r=LKV(V);return snd(r.R.map(o=>({w:o.w,s:o.s0,a:o.up*o.uq})),2.5)}});
+
+/* ===== Összefoglaló fül ===== */
+(function(){
+const S2=Math.sqrt,L2=Math.log2,f1s=220,rng8=n=>Array.from({length:n},(_,i)=>i+1);
+const SUM=[
+{n:'1. Ideális húr',en:'ideal string',fm:'f_n = n·f₁,  f₁ = (1/2L)·√(T/μ)',run(){const L=.65,T=70,mu=6e-4,v=S2(T/mu),f1=v/(2*L);
+ return{ln:['L = 0,65 m, T = 70 N, μ = 0,6 g/m','√(T/μ) = '+nf(v,1)+' m/s','f₁ = '+nf(v,1)+' / 1,3 = '+nf(f1,1)+' Hz','f₂…f₄ = '+[2,3,4].map(n=>nf(n*f1,1)).join(', ')+' Hz'],g:[rng8(8).map(n=>({f:n*f1,A:1/n}))]}}},
+{n:'2. Merev húr',en:'stiff string, inharmonicity',fm:'f_n = n·f₁·√(1+B·n²)',run(){const B=4e-4,f1=220,f10=10*f1*S2(1+B*100),c=1200*L2(S2(1+B*100));
+ return{ln:['B = 4·10⁻⁴, f₁ = 220 Hz','f₁₀ = 2200·√(1+0,04) = '+nf(f10,1)+' Hz','eltérés = 1200·log₂(√1,04) = '+nf(c,1)+' cent'],g:[rng8(12).map(n=>({f:n*f1*S2(1+B*n*n),A:1/n}))]}}},
+{n:'3. Szabad–szabad rúd',en:'free–free bar',fm:'f_n ∝ (β_nL)²,  β_nL = 4,730; 7,853; 10,996; (n+½)π',run(){const b=[4.73,7.8532,10.9956,14.1372,17.2788,20.4204],r=b.map(x=>(x/4.73)**2);
+ return{ln:['(β_nL/4,730)² = '+r.map(x=>nf(x,2)).join(' : '),'f₁ = 300 Hz → '+r.slice(0,4).map(x=>nf(300*x,0)).join(', ')+' Hz'],g:[r.map((x,i)=>({f:300*x,A:1/(i+1)}))]}}},
+{n:'4. Kör membrán',en:'circular membrane (Bessel zeros j_mn)',fm:'f_mn = j_mn/(2πR)·√(T/σ_s)',run(){const j=[2.4048,3.8317,5.1356,5.5201,6.3802,7.0156],R=.2,T=1500,ss=.26,f01=j[0]/(2*Math.PI*R)*S2(T/ss);
+ return{ln:['R = 0,2 m, T = 1500 N/m, σ_s = 0,26 kg/m²','f₀₁ = 2,4048/(2π·0,2)·√(1500/0,26) = '+nf(f01,1)+' Hz','f/f₀₁ = '+j.map(x=>nf(x/j[0],3)).join(' : ')],g:[j.map((x,i)=>({f:f01*x/j[0],A:1/(i+1)}))]}}},
+{n:'5. Lemez',en:'plate (flexural dispersion)',fm:'f ∝ (h/R²)·√(E/(ρ(1−ν²)))',run(){const f=300;
+ return{ln:['kétszeres vastagság: f → 2f = '+f*2+' Hz','felezett sugár: f → 4f = '+f*4+' Hz','hangzás: 300 → 600 → 1200 Hz'],g:[[{f,A:1}],[{f:2*f,A:1}],[{f:4*f,A:1}]]}}},
+{n:'6. Frekvenciafüggő csillapítás',en:'loss factor η, T60',fm:'σ = ηω/2,  T60 = ln1000/σ',run(){const f=1000,out=[];
+ const e=[1e-3,1e-2].map(h=>{const sg=h*2*Math.PI*f/2;return{h,sg,t:6.9078/sg}});
+ return{ln:e.map(x=>'η = '+x.h+': σ = '+nf(x.sg,2)+' 1/s, T60 = '+nf(x.t,2)+' s'),g:e.map(x=>[{f,A:1,s:x.sg}])}}},
+{n:'7. Kalapács kontaktideje',en:'hammer contact time τ, cut-off f_c',fm:'g_n = 1/√(1+(f_n/f_c)²),  f_c ≈ 1/τ',run(){const ts=[3e-3,1e-4],ln=[];
+ ts.forEach(t=>{const fc=1/t;ln.push('τ = '+t*1e3+' ms → f_c = '+nf(fc,0)+' Hz; g₁₀ = '+nf(1/S2(1+(2200/fc)**2),3))});
+ return{ln,g:ts.map(t=>rng8(10).map(n=>({f:n*f1s,A:1/n/S2(1+(n*f1s*t)**2)})))}}},
+{n:'8. Pengetés',en:'plucking',fm:'x_n(0)=u_n(p)/ω_n²,  húrnál sin(nπp)/n²',run(){const p=.25;
+ return{ln:['p = 1/4: sin(nπ/4) = '+rng8(8).map(n=>nf(sin(n*Math.PI/4),2)).join('; '),'a 4. és 8. harmonikus 0 → hiányzik'],g:[rng8(12).map(n=>({f:n*f1s,A:Math.abs(sin(n*Math.PI*p))/n/n}))]}}},
+{n:'9. Tompítás / flageolet',en:'damping, harmonic (flageolet)',fm:'σ_n = σ_n0 + κ·u_n(x_d)²,  x_d = L/2',run(){const k=40,s0=3;
+ return{ln:['σ₀ = 3 1/s, κ = 40 1/s','páratlan n: σ = 3 + 40 = 43 1/s (elhal)','páros n: σ = 3 1/s (csomópont, marad) → oktáv'],g:[rng8(8).map(n=>({f:n*f1s,A:1/n,s:s0+k*sin(n*Math.PI/2)**2}))]}}},
+{n:'10. Vonás',en:'bowing, Schelleng limit',fm:'F_N,max = 2·Z₀·v_b/(β(μs−μd)),  Z₀=√(Tμ)',run(){const Z=S2(70*6e-4),vb=.2,b=.1,dm=.4,Fm=2*Z*vb/(b*dm);
+ return{ln:['Z₀ = √(70·0,0006) = '+nf(Z,3)+' kg/s','F_N,max = 2·'+nf(Z,3)+'·0,2/(0,1·0,4) = '+nf(Fm,2)+' N','Helmholtz: A_n ∝ 1/n'],g:[rng8(14).map(n=>({f:n*f1s,A:1/n,s:.8}))]}}}];
+function dr(c,M){if(!fit(c))return;cc();const g=c.getContext('2d'),W=c.clientWidth,H=c.clientHeight,fm=Math.max(...M.map(o=>o.f))*1.05,mx=Math.max(...M.map(o=>o.A));
+ g.clearRect(0,0,W,H);g.strokeStyle=C.ink;g.fillStyle=C.ink;g.font='11px sans-serif';g.beginPath();g.moveTo(8,H-16);g.lineTo(W-6,H-16);g.stroke();
+ M.forEach((o,i)=>{const x=8+(W-20)*o.f/fm,d=20*Math.log10(Math.max(1e-6,o.A/mx)),h=Math.max(1,(60+d)/60*(H-34));g.strokeStyle=C.pk;g.lineWidth=3;g.beginPath();g.moveTo(x,H-16);g.lineTo(x,H-16-h);g.stroke();
+  if(i<12)g.fillText(nf(o.f,0),x-8,H-4)});g.lineWidth=1}
+function snd(gs){const c=actx(),fs=c.sampleRate,ys=gs.map(M=>bank(fs,M.map(o=>{const w=TAU*o.f,r=o.f/gs[0][0].f;return{w,s:o.s!=null?o.s:6.9078/2.5*(1+.2*(r*r-1)),a:o.A*w}}),2.5)),n=ys.reduce((a,y)=>a+y.length+4800,0),y=new Float32Array(n);let k=0;ys.forEach(z=>{y.set(z,k);k+=z.length+4800});play(y)}
+const box=$('sumbox');let R=[];
+SUM.forEach((p,i)=>{const r=p.run(),d=document.createElement('div');d.className='card';
+ d.innerHTML='<h3 style="margin-top:0">'+p.n+' <small>('+p.en+')</small></h3><div class="k">'+p.fm+'</div><pre><code>'+r.ln.join('\n')+'</code></pre><canvas style="height:110px"></canvas><button class="btn">▶ Hallgasd</button>';
+ box.appendChild(d);d.querySelector('button').onclick=()=>snd(r.g);R.push([d.querySelector('canvas'),r.g[0]])});
+const all=()=>R.forEach(([c,M])=>dr(c,M));
+document.querySelector('#tabs button[data-id="sum"]').addEventListener('click',()=>setTimeout(all,0));addEventListener('resize',all);
+})();
+
+/* ===== Mennyiségek fül ===== */
+(function(){
+const PI=Math.PI,sq=Math.sqrt,pw=Math.pow;
+const BI=q=>{let b=0;for(let i=0;i<400;i++){const z=(i+.5)/400;b+=2*z/sq(1-pw(1-z*z,q))/400}return b};
+const G=[
+['Húr (string)',[
+['L','L','hossz (length)','m','–',.65],['d','d','átmérő (diameter)','m','–',.001],['rho','ρ','sűrűség (density)','kg/m³','kg·m⁻³',7800],['E','E','Young-modulus','Pa','kg·m⁻¹·s⁻²',2e11],['T','T','feszítőerő (tension)','N','kg·m·s⁻²',70],
+['S','S','keresztmetszet (area)','m²','S = πd²/4',c=>PI*c.d*c.d/4],['mu','μ','hosszegységre jutó tömeg','kg/m','μ = ρS',c=>c.rho*c.S],['I','I','másodrendű nyomaték','m⁴','I = πd⁴/64',c=>PI*pw(c.d,4)/64],
+['v','c','hullámsebesség (wave speed)','m/s','c = √(T/μ)',c=>sq(c.T/c.mu)],['f1','f₁','alapfrekvencia (fundamental)','Hz = 1/s','f₁ = c/(2L)',c=>c.v/(2*c.L)],
+['B','B','inharmonicitás (stiffness coeff.)','1 (dimenziótlan)','B = π³Ed⁴/(64TL²)',c=>PI**3*c.E*pw(c.d,4)/(64*c.T*c.L*c.L)],
+['f10','f₁₀','10. felharmonikus (merev húr)','Hz','10f₁√(1+100B)',c=>10*c.f1*sq(1+100*c.B)],['ct','Δ','eltérés a harmonikustól','cent','1200·log₂√(1+100B)',c=>1200*Math.log2(sq(1+100*c.B))],
+['m','m','össztömeg (mass)','kg','m = μL',c=>c.mu*c.L],['mn','mₙ','módustömeg (modal mass)','kg','mₙ = μL/2',c=>c.mu*c.L/2],['Z0','Z₀','hullámimpedancia','kg/s','Z₀ = √(Tμ)',c=>sq(c.T*c.mu)]]],
+['Rúd (bar)',[
+['Lb','L','hossz','m','–',.3],['b','b','szélesség (width)','m','–',.03],['h','h','vastagság (thickness)','m','–',.01],['rb','ρ','sűrűség','kg/m³','–',2700],['Eb','E','Young-modulus','Pa','–',7e10],
+['A','A','keresztmetszet','m²','A = bh',c=>c.b*c.h],['Ib','I','másodrendű nyomaték','m⁴','I = bh³/12',c=>c.b*pw(c.h,3)/12],
+['fb','f₁','alapfrekvencia (szabad–szabad)','Hz','4,730²/(2πL²)·√(EI/ρA)',c=>4.73*4.73/(2*PI*c.Lb*c.Lb)*sq(c.Eb*c.Ib/(c.rb*c.A))],['r2','f₂/f₁','2. módus aránya','1','(7,853/4,730)²',c=>pw(7.8532/4.73,2)],['mb','m','tömeg','kg','m = ρAL',c=>c.rb*c.A*c.Lb]]],
+['Membrán (membrane)',[
+['R','R','sugár (radius)','m','–',.2],['hm','h','vastagság','m','–',2.5e-4],['rm','ρ','sűrűség','kg/m³','–',1380],['Ts','Tₛ','felületi feszítés (tension per length)','N/m','kg·s⁻²',1500],
+['ss','σₛ','felületi sűrűség','kg/m²','σₛ = ρh',c=>c.rm*c.hm],['f01','f₀₁','alapfrekvencia','Hz','2,405/(2πR)·√(Tₛ/σₛ)',c=>2.4048/(2*PI*c.R)*sq(c.Ts/c.ss)],['f11','f₁₁','(1,1) módus','Hz','f₀₁·3,8317/2,4048',c=>c.f01*3.8317/2.4048],['mm','m','tömeg','kg','m = σₛπR²',c=>c.ss*PI*c.R*c.R]]],
+['Lemez (plate)',[
+['Rp','R','sugár','m','–',.2],['hp','h','vastagság','m','–',.002],['Ep','E','Young-modulus','Pa','–',2e11],['nu','ν','Poisson-tényező','1','–',.3],['rp','ρ','sűrűség','kg/m³','–',7800],
+['D','D','hajlítási merevség (flexural rigidity)','N·m','D = Eh³/(12(1−ν²))',c=>c.Ep*pw(c.hp,3)/(12*(1-c.nu*c.nu))],['sp','σₛ','felületi sűrűség','kg/m²','σₛ = ρh',c=>c.rp*c.hp],['fp','f','(2,0) módus, λ²≈5,25','Hz','λ²/(2πR²)·√(D/σₛ)',c=>5.25/(2*PI*c.Rp*c.Rp)*sq(c.D/c.sp)]]],
+['Csillapítás (damping)',[
+['eta','η','veszteségi tényező (loss factor) = 1/Q','1','–',1e-3],['fd','f','frekvencia','Hz','–',1000],
+['w','ω','körfrekvencia (angular freq.)','rad/s','ω = 2πf',c=>2*PI*c.fd],['sg','σ','csillapítási tényező (decay rate)','1/s','σ = ηω/2',c=>c.eta*c.w/2],['t60','T₆₀','utózengési idő','s','ln1000/σ',c=>6.9078/c.sg],['Q','Q','jósági tényező (quality factor)','1','Q = 1/η',c=>1/c.eta]]],
+['Kalapács és Hertz-érintkezés (hammer, contact)',[
+['mh','mₕ','kalapács tömege','kg','–',.01],['vh','v','ütési sebesség','m/s','–',1],['Rh','Rₕ','kalapács gömbsugara','m','–',.01],['Eh','Eₕ','kalapács Young-modulusa','Pa','–',1e9],['nh','νₕ','kalapács Poisson-tényezője','1','–',.4],['Eo','E','tárgy Young-modulusa','Pa','–',2e11],['no','ν','tárgy Poisson-tényezője','1','–',.3],
+['Es','E*','redukált modulus','Pa','[(1−νₕ²)/Eₕ+(1−ν²)/E]⁻¹',c=>1/((1-c.nh*c.nh)/c.Eh+(1-c.no*c.no)/c.Eo)],['K','K','kontaktmerevség (p=3/2)','N/m^1,5','K = (4/3)E*√Rₕ',c=>4/3*c.Es*sq(c.Rh)],
+['Ek','Eₖ','mozgási energia','J = N·m','½mₕv²',c=>.5*c.mh*c.vh*c.vh],['dm','δₘ','legnagyobb összenyomódás','m','(2,5·mₕv²/(2K))^(1/2,5)',c=>pw(2.5*c.mh*c.vh*c.vh/(2*c.K),1/2.5)],['Fm','Fₘₐₓ','csúcserő','N','K·δₘ^1,5',c=>c.K*pw(c.dm,1.5)],
+['tau','τ','kontaktidő','s','τ = 2Bδₘ/v, B=∫(1−z^2,5)^-½dz',c=>2*BI(2.5)*c.dm/c.vh],['fc','f_c','vágófrekvencia','Hz','f_c ≈ 1/τ',c=>1/c.tau]]],
+['Pengetés, vonás, lefogás, tompítás',[
+['Fp','F_p','pengetőerő','N','–',1],['pp','p','pengetés helye (L törtrésze)','1','–',.25],['FN','F_N','vonó nyomóereje','N','–',1],['vb','v_b','vonósebesség','m/s','–',.2],['be','β','vonó távolsága a hídtól','1','–',.1],['dmu','μₛ−μ_d','tapadó–csúszó súrlódás különbsége','1','–',.4],
+['Ff','F_f','lefogó erő','N','–',5],['Kf','K_f','ujjbegy kontaktmerevsége','N/m^1,5','–',3e4],['cd','c','tompító csillapítása','N·s/m','kg·s⁻¹',.5],['k','k','fogás sorszáma (félhang)','1','–',12],
+['y0','y₀','statikus lehajlás a p helyen','m','F_p·p(1−p)L/T',c=>c.Fp*c.pp*(1-c.pp)*c.L/c.T],['xn','xₙ(0)','1. módus kezdő kitérése','m','sin(πp)F_p/(mₙω₁²)',c=>sin(PI*c.pp)*c.Fp/(c.mn*pw(2*PI*c.f1,2))],
+['Fmx','F_N,max','Schelleng-határ','N','2Z₀v_b/(β(μₛ−μ_d))',c=>2*c.Z0*c.vb/(c.be*c.dmu)],['ks','kₛ','lefogás merevsége','N/m','1,5·K_f^(2/3)·F_f^(1/3)',c=>1.5*pw(c.Kf,2/3)*pw(c.Ff,1/3)],['kt','k̃','módusra vetített merevség','1/s²','k̃ = kₛ/mₙ',c=>c.ks/c.mn],['fcl','f_c','lefogás határfrekvenciája','Hz','√k̃/(2π)',c=>sq(c.kt)/(2*PI)],
+['ka','κ','tompítás (σ-növekmény amplitúdója)','1/s','κ = c/(2mₙ)',c=>c.cd/(2*c.mn)],['xf','x_f','fogás helye (L törtrésze)','1','1−2^(−k/12)',c=>1-pw(2,-c.k/12)]]]];
+const sin=Math.sin,fmt=x=>{if(!isFinite(x))return '–';const a=Math.abs(x);return (a!==0&&(a>=1e6||a<1e-3)?x.toExponential(3):+x.toPrecision(4)).toString().replace('.',',').replace('e+','·10^').replace('e-','·10^−')};
+const box=document.getElementById('qtybox'),c={},outs=[];
+G.forEach(([t,rows])=>{const d=document.createElement('div');d.className='card';let h='<h3 style="margin-top:0">'+t+'</h3><div class="scroll"><table><tr><th>Jel</th><th>Név</th><th>Mértékegység</th><th>Számítás</th><th>Érték</th></tr>';
+ rows.forEach(r=>{const[k,sy,nm,u,f,v]=r,inp=typeof v==='number';if(inp)c[k]=v;
+  h+='<tr><td><b>'+sy+'</b></td><td>'+nm+'</td><td><code>'+u+'</code></td><td>'+f+'</td><td'+(inp?' style="background:var(--yel)"><input data-k="'+k+'" value="'+v+'" size="9" style="font:inherit;background:transparent;color:var(--ink);border:0;border-bottom:1.5px solid var(--ink)">':' style="background:var(--tint);font-weight:800;color:var(--deep)" data-o="'+k+'">')+'</td></tr>'});
+ d.innerHTML=h+'</table></div>';box.appendChild(d)});
+const calc=()=>{G.forEach(([t,rows])=>rows.forEach(r=>{if(typeof r[5]==='function'){c[r[0]]=r[5](c);const e=box.querySelector('[data-o="'+r[0]+'"]');e.textContent=fmt(c[r[0]])}}))};
+box.addEventListener('input',e=>{const k=e.target.dataset.k;if(!k)return;const v=parseFloat(e.target.value.replace(',','.'));if(isFinite(v)&&v>0){c[k]=v;calc()}});
+calc();
+})();
+</script></body></html>
