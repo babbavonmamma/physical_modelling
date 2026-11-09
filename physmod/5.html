@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vonós húrok digitális hullámvezetős modellje</title>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+<style>
+:root{--paper:#f2ede2;--ink:#1c1a17;--card:#fffdf8;--pink:#ff2e8a;--blue:#bfe4f5;--deep:#2f6f8f;--soft:#eaf5fb;--pb:#ffe6f2;--pre:#1c1a17;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--paper:#1c1b19;--ink:#efe9dc;--card:#262420;--blue:#2a4a5a;--deep:#8ccbe8;--soft:#23323a;--pb:#40222f;--pre:#0f0e0d}}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:'Segoe UI',system-ui,sans-serif;line-height:1.55}
+.wrap{max-width:1000px;margin:0 auto;padding:16px 16px 60px}
+h1{font-family:'Marker Felt','Segoe Print',cursive;color:var(--pink);-webkit-text-stroke:1.2px var(--ink);font-size:clamp(24px,4vw,38px);margin:8px 0}
+nav{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
+nav button{font-weight:800;font-size:13px;border:2px solid var(--ink);border-radius:20px;background:var(--card);color:var(--ink);padding:7px 14px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+nav button.active{background:var(--ink);color:var(--paper)}
+section{display:none}section.active{display:block}
+.card{background:var(--card);border:2.5px solid var(--ink);border-radius:16px;padding:18px 20px;margin-bottom:18px;box-shadow:4px 4px 0 var(--ink);min-width:0}
+h2{font-family:'Marker Felt','Segoe Print',cursive;color:var(--pink);font-size:23px;margin:0 0 6px}
+h3{font-size:17px;margin:20px 0 6px;color:var(--deep)}
+.scroll{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:14px;margin:8px 0}
+th,td{border:1.5px solid var(--ink);padding:7px 10px;text-align:left;vertical-align:top}th{background:var(--blue)}
+pre{background:var(--pre);color:#fff;padding:14px;border-radius:10px;overflow-x:auto;font-size:12.5px;border:2px solid var(--deep);box-shadow:3px 3px 0 var(--pink)}
+code{font-family:'Courier New',monospace;background:var(--soft);color:var(--deep);padding:1px 5px;border-radius:4px;font-weight:bold;overflow-wrap:anywhere}pre code{background:none;color:inherit;padding:0}
+.intuition{border:2.5px solid var(--deep);background:var(--soft);border-radius:12px;padding:14px 16px;margin:16px 0;font-size:14.5px;box-shadow:3px 3px 0 var(--deep)}
+.intuition b:first-child{display:block;color:var(--deep);margin-bottom:6px;font-size:15px}
+.warn{border-color:var(--pink);background:var(--pb);box-shadow:3px 3px 0 var(--pink)}
+.der{border:2.5px solid var(--deep);background:var(--card);border-radius:12px;margin:14px 0;padding:0 14px}
+.der>summary{cursor:pointer;font-weight:900;color:var(--deep);padding:10px 0}
+.der[open]>summary{border-bottom:2px dashed var(--deep);margin-bottom:8px}.der p{font-size:14.5px;margin:8px 0}
+.sim{border:2.5px solid var(--pink);background:var(--pb);border-radius:12px;padding:10px 14px;margin:14px 0;min-width:0}
+.sim .pt{font-weight:900;color:var(--pink);margin:0 0 4px}
+.ctl{display:grid;grid-template-columns:190px 1fr 56px;gap:8px;align-items:center;font-size:14px;margin:6px 0}
+.ctl input{width:100%}.ctl output{font-family:'Courier New',monospace;font-size:13px;font-weight:bold;color:var(--deep)}
+canvas{display:block;width:100%;max-width:100%;height:240px;background:#fff;border:2px solid var(--ink);border-radius:10px;margin-top:10px}
+.sim .box{font-family:'Courier New',monospace;font-size:12.5px;border:2px dashed var(--deep);background:var(--soft);border-radius:10px;padding:8px 12px;margin:10px 0 4px}
+.btn{font-weight:800;border:2px solid var(--ink);border-radius:20px;background:var(--pink);color:#fff;padding:8px 18px;cursor:pointer;box-shadow:2px 2px 0 var(--ink);font-size:14px}
+mjx-container[display=true]{max-width:100%;overflow-x:auto;overflow-y:hidden}
+@media(max-width:560px){.ctl{grid-template-columns:1fr 56px}.ctl label{grid-column:1/-1}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>♪ Vonós húrok digitális hullámvezetős modellje</h1>
+<nav id="tabs">
+<button class="active" data-id="math">Matematika &amp; Alapok</button>
+<button data-id="demo">Élő demó</button>
+<button data-id="code">Forráskód</button>
+<button data-id="src">Források &amp; bővítések</button>
+<button data-id="tasks">Feladatok &amp; szótár</button>
+</nav>
+
+<section class="active" id="p-math"><div class="card">
+<h2>A modell működése és matematikája</h2>
+<div class="intuition"><b>🧭 Mire építünk, és mi az új?</b>Már ismered a <b style="display:inline;margin:0">Karplus–Strong</b> hurkot (pengetett húr), a <b style="display:inline;margin:0">modális</b> és a <b style="display:inline;margin:0">tömeg–rugó</b> szintézist. Ez a tananyag a húrt <i>haladó hullámok</i> felől építi fel (digitális hullámvezető), és ráteszi a <b style="display:inline;margin:0">vonót</b>: egy nemlineáris, tapad–csúszik kölcsönhatást. Minden fejezet: magyarázat → lenyitható levezetés → hallható szimuláció.</div>
+<div class="intuition"><b>🎯 Miben más a vonós húr, mint a pengetett?</b>A pengetett húr <i>szabad lecsengés</i>: egy kezdeti impulzus, utána a hurok csak veszít energiát, a rendszer lineáris. A vonó <i>folyamatosan</i> pumpál energiát a húrba, és a kölcsönhatás erősen <b style="display:inline;margin:0">nemlineáris</b>. A hullámvezető-hurok marad, de a közepébe egy nemlineáris „csomópont” kerül.</div>
+
+<h3>1. A húr két nézete: módusok és haladó hullámok</h3>
+<p>A modális szintézis a húrt <i>állóhullámok</i> (módusok) összegeként írja le: minden módus egy külön rezgő „tömeg–rugó”. Ugyanez a mozgás két ellentétes irányba futó hullámként is leírható. A hullámegyenlet \( \partial_t^2y=c^2\partial_x^2y \) megoldása (d’Alembert):</p>
+<p style="text-align:center">\( y(x,t)=y^+(x-ct)+y^-(x+ct),\qquad c=\sqrt{T/\mu}. \)</p>
+<p>Pengetésnél a kezdeti háromszög két fél amplitúdójú háromszögre esik szét, ezek a két vég felé indulnak, és a rögzített végekről előjelváltással verődnek vissza. A két leírás egyenértékű, de a költségük más: a módusos modell minden módust külön számol, a hullámvezető mindig két késleltetővonal, akárhány felharmonikus szól. Vonásnál ez különösen előny: a vonó <i>az összes módust egyszerre</i> hajtja, a hullámvezetőben ez egyetlen pontbeli kölcsönhatás.</p>
+<div class="sim" id="pn0"></div>
+
+<h3>2. A digitális hullámvezető</h3>
+<p>A hullámok futási idejét a késleltetővonal adja. Ha a húr hossza \(L\), a hullám \(M=Lf_s/c\) minta alatt fut végig, ezért <b>két sín</b> kell: egy a jobbra, egy a balra haladó hullámnak, mindkettő \(M\) minta hosszú. A húr egy pontjának sebessége a két sín megfelelő pontjának összege. Sebességhullámokat (\(v^\pm\)) használunk, mert a vonó a sebességre hat.</p>
+<ul>
+<li><b>Rögzített vég:</b> itt a sebesség nulla, tehát \(v^-=-v^+\): a hullám előjelet vált, a sín végén egy „−1” szorzó van.</li>
+<li><b>Hangmagasság:</b> a körüljárás \(N=2M\) minta, ezért \(f_0=f_s/N\), azaz a Karplus–Strongból ismert hurokhossz.</li>
+<li><b>Veszteség:</b> a magas frekvenciák elnyelődnek; ezt a hídnál egy szűrő modellezi, ugyanaz az átlagoló, \(H_{lp}(z)=g[(1-S)+Sz^{-1}]\).</li>
+</ul>
+<p>Pengetésnél az egész lineáris, ezért az elemek sorrendje felcserélhető, és a két sín egyetlen hurokká vonható össze: ez a Karplus–Strong. A vonó nemlineáris, ezért az egész hurkot nem vonhatjuk össze. De a vonó és az adott vég között minden lineáris, így <i>mindkét oldalon</i> összevonjuk a két sínt egy-egy „körülfordulási” késleltetővonalba. Az eredmény: két késleltetővonal, köztük a vonó.</p>
+<details class="der"><summary>📐 Levezetés: a vonótól a hídig és vissza</summary>
+<p>A híd oldali szakasz hossza \(\beta L\), így a körülfordulás \(2\beta L/c\) ideig tart, azaz \(N_b=\beta N\) mintáig. Út közben egyetlen visszaverődés (a hídnál, \(-1\)) és a veszteségszűrő van. Mivel ezek lineárisak és időinvariánsak, az átviteli függvényeik szorzódnak, a sorrend mindegy:</p>
+<p style="text-align:center">\( v^-_{be}[n]=-H_{lp}(z)\,z^{-N_b}\,v^+_{ki}[n]. \)</p>
+<p>A nyaki oldalon ugyanez \(N_n=(1-\beta)N\)-nel (a nyereg a „végpont”). Együtt: \(N_b+N_n=N\), tehát a körülfordulás ideje a periódus.</p></details>
+
+<h3>3. A Helmholtz-mozgás: mit csinál a vonós húr valójában?</h3>
+<p>Helmholtz (1863) észrevette, hogy a megvont húr nem szinuszosan rezeg. A húr alakja két egyenes szakasz, amelyek találkozásánál egy éles <b>törés</b> (korner) fut körbe a húron, a rögzített végek közt. Egy körüljárás ideje \(T=2L/c\), vagyis az alapfrekvencia a szokásos \(f_0=c/(2L)\). A vonó helyén a húr sebessége kétféle állapotot vesz fel:</p>
+<ul>
+<li><b>ragadás</b> (stick): a húr a vonóval együtt halad, sebessége \(v_b\). Ez a periódus \(1-\beta\) részéig tart;</li>
+<li><b>csúszás</b> (slip): a törés a vonó helyén áthaladva a húrt visszarántja, rövid ideig (\(\beta T\)) ellentétes irányba mozog.</li>
+</ul>
+<p>Mivel a húr középsebessége nulla, a csúszás sebessége nagy: \(v_{slip}=-v_b\,\dfrac{1-\beta}{\beta}\). Minél közelebb húzzuk a vonót a hídhoz (kis \(\beta\)), annál rövidebb, de annál hevesebb a csúszás.</p>
+<p>A hídra ható erő a törés körbefutását követi: <b>fűrészfog</b>, amelynek \(k\)-adik felharmonikusa \(\propto 1/k\). Ezért ilyen fényes és „karcos” a vonós hangszín a szinuszhoz képest.</p>
+<details class="der"><summary>📐 Levezetés: a csúszási sebesség</summary>
+<p>A vonó helyén a húr sebessége periodikus, átlaga nulla (a húr nem sodródik el). Ragadás alatt \(v_b\), \(1-\beta\) ideig; csúszás alatt \(v_s\), \(\beta\) ideig:</p>
+<p style="text-align:center">\( (1-\beta)\,v_b+\beta\,v_s=0\;\Rightarrow\; v_s=-v_b\,\dfrac{1-\beta}{\beta}.\)</p>
+<p>Példa: \(\beta=0{,}1\) esetén \(v_s=-9\,v_b\). A szimulációban ezt a mérték­et lehet ellenőrizni.</p></details>
+<div class="sim" id="pn1"></div>
+
+<h3>4. A vonó–húr csatlakozás és a súrlódási tábla</h3>
+<p>A vonó a húrra a pontban \(F\) erőt fejt ki. Végtelen húr esetén egy \(F\) erő mindkét irányba \(F/(2Z_0)\) sebességhullámot indít, ahol \(Z_0=\sqrt{T\mu}\) a húr hullámimpedanciája. Ha a vonó felől a bal oldali szakasz felől \(a\), a jobb felől \(b\) sebességhullám érkezik, akkor</p>
+<p style="text-align:center">\( v_s=a+b+\Delta,\qquad \Delta=\dfrac{F}{2Z_0},\qquad v_\Delta=v_b-v_s. \)</p>
+<p>A súrlódási erő a relatív sebesség függvénye, \(F=f(v_\Delta)\), ezért az egyenlet implicit. Szokásos megoldás: <b>táblázatos súrlódási tábla</b> (Smith, 1986). Ha bevezetjük az „erő nélküli” relatív sebességet \(v_\Delta^-=v_b-a-b\), akkor a táblából egyetlen szorzóval kapjuk a hozzáadott hullámot:</p>
+<p style="text-align:center">\( \Delta=\rho(v_\Delta^-)\,v_\Delta^-,\qquad \rho(x)=\min\!\Big(1,\;\big(|kx|+0{,}75\big)^{-4}\Big),\quad k=5-4P. \)</p>
+<p>Itt \(P\in[0,1]\) a vonónyomás. Ez egy gyakran használt, fenomenologikus tábla (pl. a STK-ban is így szerepel), nem a súrlódás első elvekből levezetett törvénye. Két tartománya van:</p>
+<ul>
+<li><b>ragadás</b>: \(\rho=1\), ekkor \(\Delta=v_\Delta^-\), azaz \(v_s=v_b\): a húr pontosan a vonó sebességével megy;</li>
+<li><b>csúszás</b>: \(\rho<1\): a súrlódó erő a sebességgel csökken, a vonó csak kisebb mértékben hajtja a húrt.</li>
+</ul>
+<details class="der"><summary>📐 Levezetés: miért \(\rho=1\) a ragadás?</summary>
+<p>A kimenő hullámok: \(a'=\) (jobbra) \(=a+\Delta\), \(b'=\) (balra) \(=b+\Delta\). A húr sebessége a vonónál \(v_s=a+b+\Delta\). Ha \(\Delta=v_\Delta^-=v_b-a-b\), akkor \(v_s=v_b\) pontosan. Tehát \(\rho=1\) a „teljes ragadás”, \(\rho=0\) pedig a vonó nélküli húr (\(\Delta=0\), \(v_s=a+b\)).</p></details>
+<div class="sim" id="pn2"></div>
+
+<h3>5. Az algoritmus: két késleltetővonal és a vonó</h3>
+<p>Mindkét szakasz egyetlen késleltetővonal, amely a vonótól a végpontig <i>és vissza</i> vezeti a hullámot, ezért a hossza a szakasz körülfordulási ideje (\(\beta T\), illetve \((1-\beta)T\)). A két végponton előjelet váltunk (rögzített vég), a hídon még veszteséges szűrőt is:</p>
+<p style="text-align:center">\( H_{lp}(z)=g\,[(1-S)+S\,z^{-1}],\qquad N_b+N_n+S=\dfrac{f_s}{f_0}. \)</p>
+<p>Az utolsó összefüggés a hangolás: a szűrő \(S\) mintányi (DC-n) késleltetést ad a körhöz, ezt le kell vonni. Pontos hangoláshoz itt is törtrészes (allpass) késleltetés kell, a Karplus–Strong tananyagban látottak szerint; a demó egyszerűen egész mintára kerekít, ezért magasabb hangoknál pár centes hangolási hiba jelentkezik.</p>
+<pre>nr = −nyak.kimenet            // nyaki visszaverődés
+br = −g·szűrő(híd.kimenet)    // hídi visszaverődés, veszteséggel
+vs = br + nr                  // húrsebesség a vonó nélkül
+vd = vb − vs                  // erő nélküli relatív sebesség
+Δ  = vd·ρ(vd)                 // súrlódási tábla
+nyak.bemenet = br + Δ ;  híd.bemenet = nr + Δ
+kimenet = híd.kimenet         // a hídra érkező hullám ≈ híderő</pre>
+
+<h3>6. A hangszín: fűrészfog és hiányzó felharmonikusok</h3>
+<p>A hídra ható erő fűrészfog, ezért a kimenet felharmonikusai kb. \(1/k\) szerint csökkennek. A vonó helyén mért sebesség viszont négyszögjel, amelynek spektruma \(\beta\)-tól függ: amelyik felharmonikusnak a vonó helyén csomópontja van, azt a vonó nem tudja gerjeszteni. Ez a pengetett húr pengetési helyéhez hasonló jelenség.</p>
+<details class="der"><summary>📐 Levezetés: a négyszögjel Fourier-együtthatói</summary>
+<p>A sebesség a vonónál: \(v_b\) ragadás alatt, \(v_s=-v_b(1-\beta)/\beta\) csúszás alatt. Felírható így: \(v(t)=v_b+(v_s-v_b)\,\chi(t)\), ahol \(\chi\) a csúszás \(\beta T\) hosszú impulzusa, és \(v_s-v_b=-v_b/\beta\).</p>
+<p>Egy \(\beta T\) szélességű, \(A\) magasságú impulzussor \(k\)-adik harmonikusának amplitúdója \(\dfrac{2A\,|\sin(k\pi\beta)|}{k\pi}\). Behelyettesítve \(A=v_b/\beta\)-t:</p>
+<p style="text-align:center">\( a_k=2v_b\,\dfrac{|\sin(k\pi\beta)|}{k\pi\beta}. \)</p>
+<p>Ez nulla, ha \(k\beta\) egész: \(\beta=\tfrac15\)-nél az 5., 10., …, \(\beta=\tfrac1{10}\)-nél a 10., 20. harmonikus esik ki. Ez a \(k\)-adik módus csomópontjainak (\(x=jL/k\)) feltétele.</p></details>
+<h3>7. Hangolás és hangszertest</h3>
+<p>A hurokszűrő \(H_{lp}\) késleltetése frekvenciafüggő: \(\tau_{lp}(\omega)=\dfrac{1}{\omega}\operatorname{atan2}\!\big(S\sin\omega,\;1-S+S\cos\omega\big)\). A pontos hangolás feltétele így \(D_b+D_n+\tau_{lp}(\omega_0)=f_s/f_0\), ahol \(\omega_0=2\pi f_0/f_s\); a gen~ kód ezt számolja (<code>tlp</code>). Ha \(S=\tfrac12\), alacsony frekvencián \(\tau_{lp}\approx\tfrac12\) minta. A törtrészes késleltetést a <code>Delay</code> köbös interpolációja adja.</p>
+<p>A hangszertest lineáris, ezért a hídról érkező jelet utólag szűrjük. Egy rezonancia másodrendű szűrő: \(y[n]=A\,x[n]+2r\cos\theta\,y[n-1]-r^2y[n-2]\), ahol \(\theta=2\pi f_r/f_s\), és \(r=e^{-\pi B/f_s}\) a \(B\) sávszélességből adódik. Egy hegedű első kiemelkedő rezonanciái hozzávetőleg néhány száz Hz körül vannak; a kód két ilyen rezonátort használ.</p>
+<h3>8. Játszhatóság: Schelleng-diagram</h3>
+<p>Nem minden vonónyomás működik. Schelleng (1973) megmutatta, hogy adott vonósebességnél és vonóhelynél van egy <b>minimális</b> és egy <b>maximális</b> vonóerő, amely közt a Helmholtz-mozgás stabil: \(F_{max}\propto v_b/\beta\) és \(F_{min}\propto v_b/\beta^2\) (arányosságok). Túl kis erőnél a húr „nem kapaszkodik meg”, hangja sziszeg/zörög; túl nagynál „megfojtjuk”, hangja durva, nyikorgó, alapfrekvenciája instabil. Kis \(\beta\)-nál (hídhoz közel) a tartomány keskenyebb, ezért szól ott harsányan, de nehezebben kezelhetően (sul ponticello).</p>
+<details class="der"><summary>📐 Schelleng határai és a támadás</summary>
+<p>Schelleng nyomán, közelítőleg (\(\mu_s,\mu_d\): tapadási és csúszási súrlódási tényező, \(R_b\): a híd ellenállása): \(F_{max}\approx\dfrac{2Z_0v_b}{\beta(\mu_s-\mu_d)}\), \(F_{min}\approx\dfrac{Z_0^2v_b}{2R_b\beta^2(\mu_s-\mu_d)}\). A felső határ azért van, mert a tapadásnak „el kell engednie” minden periódusban; ha az erő nagyobb, nem tud csúszás indulni. Az alsó határ azért, mert a törésnek elég erősnek kell lennie ahhoz, hogy a vonó újra megragadja a húrt.</p>
+<p>A hang <b>támadása</b> is számít: a Helmholtz-mozgás néhány periódus alatt alakul ki, és a vonóerő–gyorsulás arányától függ, hogy tiszta indulás lesz-e vagy „zörgő” (Guettler, 2002). A kódban a <code>gate</code> lassú felfutása ezt egyszerűen modellezi; érdemes kísérletezni vele.</p></details>
+<div class="intuition warn"><b>⚠️ Korlátok</b>A modell végtelenül keskeny vonót, merev (diszperzió­mentes) húrt és csak egy polarizációt feltételez; nincs hangszertest, nincs torziós hullám, és a súrlódási tábla fenomenologikus. Ezek mind bővíthetők (lásd a „Források &amp; bővítések” fület), de már ez a vázlat is felismerhető vonós hangot ad.</div>
+<h3>9. Összevetés: hullámvezető, modális, tömeg–rugó</h3>
+<div class="scroll"><table><tr><th></th><th>Hullámvezető</th><th>Modális</th><th>Tömeg–rugó</th></tr>
+<tr><td><b>Alapkép</b></td><td>haladó hullámok, késleltetővonal</td><td>állóhullám-módusok</td><td>tömegek és rugók hálója</td></tr>
+<tr><td><b>Költség egy húrnál</b></td><td>két késleltetővonal, kevés művelet</td><td>módusonként egy rezonátor</td><td>pontonként egy egyenlet, drága</td></tr>
+<tr><td><b>Vonó (tapad–csúszik)</b></td><td>egy csomópont a két sín közt</td><td>minden módust külön kell hajtani és csatolni</td><td>természetes (súrlódás a tömegen), de drága</td></tr>
+<tr><td><b>Gerjesztés helye</b></td><td>a késleltetővonal csapolása</td><td>módusonkénti súly, \(\sin(k\pi\beta)\)</td><td>a megfelelő tömeg</td></tr>
+<tr><td><b>Mire jó</b></td><td>1D hullámok: húr, cső</td><td>hangszertest, lemez, rezonanciák</td><td>összetett, nemlineáris szerkezetek</td></tr></table></div>
+<p>A módszerek kombinálhatók: a húrt hullámvezetővel, a hangszertestet modális szűrővel építjük (lásd a 7. szakasz rezonátorait).</p>
+</div></section>
+
+<section id="p-demo"><div class="card">
+<h2>Élő vonós húr szintetizátor</h2>
+<p>A szimuláció a teljes modellt futtatja: a vonó 0,05 s alatt „ráfekszik” a húrra, 1,7 s-ig húz, majd felemelkedik. A grafikon a stabil állapot néhány periódusát mutatja: kék sáv = <b>ragadás</b>, fehér = <b>csúszás</b>.</p>
+<div class="sim" id="pn3"></div>
+<div class="intuition"><b>👂 Mit hallgass?</b>Húzd \(\beta\)-t kis értékre: fényesebb, sípolóbb hang. Növeld a nyomást: előbb tisztább, majd nyikorgó lesz. Vedd le a nyomást: sziszegő, bizonytalan hang. Húzd a vonósebességet: nő a hangerő, de a hangszín nem változik jelentősen.</div>
+</div></section>
+
+<section id="p-code"><div class="card">
+<h2>Forráskód – Max/MSP gen~ (genexpr)</h2>
+<p>Hozz létre egy <code>gen~</code> objektumot, nyisd meg, tegyél bele egy <code>codebox</code>-ot, és másold be az alábbi kódot. Kimenetek: <code>out1</code> = hangszertestes hang, <code>out2</code> = a húr sebessége a vonónál (megfigyeléshez). A <code>Param</code>-okat a gen~ objektumnak küldött <code>f0 196</code>, <code>vb 0.2</code> stb. üzenetekkel állítod; <code>gate 1</code> ráteszi, <code>gate 0</code> leveszi a vonót.</p>
+<pre>// Vonós húr – digitális hullámvezető (gen~ codebox)
+Param f0(196, min=40, max=1000);   // alapfrekvencia (Hz)
+Param vb(0.2, min=0, max=0.6);     // vonósebesség
+Param P(0.5, min=0, max=1);        // vonónyomás
+Param beta(0.1, min=0.03, max=0.5);// vonó helye a hídtól (törtrész)
+Param S(0.5, min=0, max=0.5);      // hídszűrő simítása
+Param g(0.995, min=0.9, max=1);    // hurokerősítés
+Param gate(1, min=0, max=1);       // vonó fel/le
+Param nz(0.02, min=0, max=0.2);    // vonózaj mértéke
+Param body(0.5, min=0, max=1);     // hangszertest aránya
+
+Delay bridge(4096, interp="cubic");  // híd felőli vonal
+Delay neck(4096, interp="cubic");    // nyak felőli vonal
+History xp(0);                       // hídszűrő előző bemenete
+History ep(0);                       // vonóburkoló állapota
+History a1(0), a2(0), b1(0), b2(0);  // test-rezonátorok
+
+// --- hangolás: a szűrő frekvenciafüggő késleltetését is levonjuk ---
+w0  = twopi*f0/samplerate;
+tlp = atan2(S*sin(w0), 1 - S + S*cos(w0))/w0;
+D   = samplerate/f0 - tlp;
+Db  = max(3, beta*D);              // hídoldali körülfordulási idő
+Dn  = max(3, D - Db);              // nyakoldali körülfordulási idő
+
+// --- a vonó csomópontja ---
+env = mix(ep, gate, 0.002);        // puha fel- és lemenet
+ep  = env;
+bo  = bridge.read(Db);
+xo  = (1-S)*bo + S*xp;             // veszteségszűrő
+xp  = bo;
+br  = -g*xo;                       // hídi visszaverődés
+nr  = -neck.read(Dn);              // nyaki visszaverődés
+s   = br + nr;                     // húrsebesség a vonó nélkül
+vd  = vb*env*(1 + nz*noise()) - s; // erő nélküli relatív sebesség
+k   = 5 - 4*P;
+rho = min(1, pow(abs(k*vd) + 0.75, -4));  // súrlódási tábla
+nv  = vd*rho*env;                  // hozzáadott hullám (Delta)
+neck.write(br + nv);
+bridge.write(nr + nv);
+
+// --- hangszertest: két másodrendű rezonátor ---
+r   = 0.998;
+th1 = twopi*280/samplerate;
+th2 = twopi*520/samplerate;
+y1  = 0.0005*bo + 2*r*cos(th1)*a1 - r*r*a2;  a2 = a1;  a1 = y1;
+y2  = 0.0005*bo + 2*r*cos(th2)*b1 - r*r*b2;  b2 = b1;  b1 = y2;
+
+out1 = mix(bo, y1 + y2, body);
+out2 = s + nv;</pre>
+<div class="intuition"><b>🔧 Megjegyzések a kódhoz</b>A <code>read</code> mindig a <code>write</code> előtt fut, így a késleltetés pontosan <code>Db</code>, illetve <code>Dn</code> minta; ezt egy impulzussal érdemes ellenőrizni. A köbös interpoláció miatt a törtrészes késleltetés külön allpass nélkül is jó közelítés. Ha a hang túl halk vagy hangos, a <code>vb</code> mellett a <code>0.0005</code> tesztszorzót és a <code>body</code> arányt állítsd. A <code>0.995</code> hurokerősítés és a rezonanciák (280, 520 Hz) kiindulópontok, füllel hangold őket.</div>
+<details class="der"><summary>💻 Ugyanaz JavaScriptben (ezt futtatja az „Élő demó” fül)</summary><p>A demó egész mintára kerekít és nincs benne hangszertest; a lap maga fűzi ide be a függvényt.</p>
+<pre id="srccode"></pre></details>
+<h3>Az elméletből a kódba</h3>
+<div class="scroll"><table><tr><th>Elmélet</th><th>Kód</th></tr>
+<tr><td>\(N_b=\beta D,\;N_n=D-N_b\), \(D=f_s/f_0-S\)</td><td><code>Db</code>, <code>Dn</code>, <code>D</code>, <code>tlp</code> (JS: <code>Nb</code>, <code>Nn</code>)</td></tr>
+<tr><td>Hídi veszteségszűrő \(g[(1-S)+Sz^{-1}]\)</td><td><code>gD</code>, <code>S</code>, <code>xo</code></td></tr>
+<tr><td>\(v_s=a+b+\Delta\)</td><td><code>s=br+nr</code>, <code>vs[n]=s+nv</code></td></tr>
+<tr><td>\(v_\Delta^-=v_b-a-b\)</td><td><code>vd</code></td></tr>
+<tr><td>\(\rho(x)\), \(k=5-4P\)</td><td><code>rho</code>, <code>k</code></td></tr>
+<tr><td>\(\Delta=\rho\,v_\Delta^-\)</td><td><code>nv</code></td></tr>
+<tr><td>Vonó fel- és lemenet</td><td><code>env</code>, <code>ep</code>, <code>gate</code> (JS: <code>e</code>)</td></tr></table></div>
+</div></section>
+
+<section id="p-src"><div class="card">
+<h2>Eredeti források és bővítések</h2>
+<ul>
+<li>H. Helmholtz: <i>Die Lehre von den Tonempfindungen</i>, 1863 – a Helmholtz-mozgás.</li>
+<li>C. V. Raman: <i>On the mechanical theory of the vibrations of bowed strings</i>, 1918.</li>
+<li>J. C. Schelleng: <i>The bowed string and the player</i>, JASA 53(1), 1973, 26–41.</li>
+<li>M. E. McIntyre, J. Woodhouse: <i>On the fundamentals of bowed-string dynamics</i>, Acustica 43(2), 1979, 93–108.</li>
+<li>M. E. McIntyre, R. T. Schumacher, J. Woodhouse: <i>On the oscillations of musical instruments</i>, JASA 74(5), 1983, 1325–1345.</li>
+<li>J. O. Smith: <i>Efficient Simulation of the Reed-Bore and Bow-String Mechanisms</i>, ICMC 1986 – a súrlódási tábla és a vonócsomópont.</li>
+<li>J. Woodhouse: <i>On the playability of violins. Part I: Reflection functions</i>, Acustica 78, 1993, 125–136.</li>
+<li>K. Guettler: <i>On the creation of the Helmholtz motion in bowed strings</i>, Acta Acustica united with Acustica 88, 2002, 970–985 – a tiszta támadás feltételei.</li>
+<li>J. O. Smith: <i>Physical Audio Signal Processing</i> (CCRMA, online) – a vonós húr fejezete: ccrma.stanford.edu/~jos/pasp/</li>
+</ul>
+<h3>Merre tovább?</h3>
+<div class="scroll"><table><tr><th>Bővítés</th><th>Mit ad</th></tr>
+<tr><td>Hangszertest-szűrő</td><td>A híd kimenetét rezonátorokon (pl. 2–4 másodrendű szűrő) vezetjük át: hegedű- vagy csellóhangzás.</td></tr>
+<tr><td>Hőmodell a súrlódáshoz</td><td>A gyanta hőmérséklete változik, a súrlódás emiatt a sebesség mellett az előzményektől is függ (Woodhouse).</td></tr>
+<tr><td>Véges szélességű vonó</td><td>A vonó nem egy pont: a szélessége kiszűri a felharmonikusokat és simítja az átmeneteket.</td></tr>
+<tr><td>Diszperzió, merevség</td><td>Allpass-lánc a hurokban: a felharmonikusok kissé élesednek, főként vastag húrnál.</td></tr>
+<tr><td>Torziós és keresztirányú hullámok</td><td>A „kaparós” hangok és a farkashang modellezéséhez.</td></tr></table></div>
+</div></section>
+
+<section id="p-tasks"><div class="card">
+<h2>További feladatok</h2>
+<div class="scroll"><table><tr><th>Feladat</th><th>Leírás</th></tr>
+<tr><td><b>Helmholtz-ellenőrzés</b></td><td>Állítsd \(\beta=0{,}1\)-re, és olvasd le az élő demó dobozában a legnagyobb \(|v_s|\) értéket. Hasonlítsd a \(v_b(1-\beta)/\beta\) elméleti értékhez.</td></tr>
+<tr><td><b>Csúszási arány</b></td><td>Mérd meg, a periódus mekkora része csúszás (fehér sáv). Hogyan függ \(\beta\)-tól és \(P\)-től?</td></tr>
+<tr><td><b>Játszhatósági térkép</b></td><td>Rögzített \(\beta\)-nál keresd meg \(P\) azon tartományát, ahol tiszta a hang. Ismételd 3 különböző \(\beta\)-ra, és vesd össze Schelleng arányosságaival.</td></tr>
+<tr><td><b>Felharmonikusok</b></td><td>Rögzítsd a kimenetet, nézd meg a spektrumot: a harmonikusok amplitúdója hozzávetőleg \(1/k\)-val csökken? Mi történik, ha \(S\) változik?</td></tr>
+<tr><td><b>Pengetés vs. vonás</b></td><td>Cseréld a vonót egy rövid zajimpulzusra, és hasonlítsd össze a Karplus–Strong hanggal: mi a különbség a lecsengésben?</td></tr>
+<tr><td><b>Két sín</b></td><td>Rajzold le egy 100 mintás húr két sínét (\(M=50\)). Pengesd meg \(\beta=\tfrac15\)-nél, és kövesd a hullámot lépésenként. Hány minta múlva áll vissza az alak?</td></tr>
+<tr><td><b>Összevonás</b></td><td>Mutasd meg, hogy két \(-1\) szorzó és két azonos veszteségszűrő egyetlen hurokká vonható össze. Mennyi lesz a hurok hossza és erősítése?</td></tr>
+<tr><td><b>Kimeneti csap</b></td><td>Hol kell a kimenetet venni a húron, hogy a 3. felharmonikus ne hallatszódjon? Ellenőrizd gen~-ben a <code>Delay</code> csapolásával.</td></tr>
+<tr><td><b>Hangszertest</b></td><td>Vezesd a kimenetet két-három rezonátoron át, és állítsd be a hangszínt.</td></tr>
+<tr><td><b>Max-patch</b></td><td>Építs patchet: <code>line~</code> vezérelje a <code>vb</code>-t és a <code>gate</code>-et (fel- és lemenet), egy <code>cycle~</code> 5–6 Hz-en modulálja az <code>f0</code>-t (vibrato). Hallgasd meg, hogyan változik a hangszín.</td></tr>
+<tr><td><b>Hiányzó harmonikusok</b></td><td>Állítsd \(\beta=\tfrac15\)-re, és gen~-ből kimenet 2-t (<code>out2</code>) <code>spectroscope~</code>-ba vezetve ellenőrizd, hogy az 5. és 10. harmonikus gyenge-e.</td></tr>
+<tr><td><b>Pontos hangolás</b></td><td>Mérd <code>fffb~</code> vagy <code>sigmund~</code> segítségével a hangolási hibát 100–1000 Hz közt, a <code>tlp</code> nélkül és vele.</td></tr></table></div></div>
+<div class="card"><h2>Jelölések és szószedet</h2><div class="scroll"><table>
+<tr><th>Jel</th><th>Jelentés</th></tr>
+<tr><td>\(c=\sqrt{T/\mu}\)</td><td>hullámsebesség a húron (\(T\): feszítés, \(\mu\): hosszegységre jutó tömeg)</td></tr>
+<tr><td>\(Z_0=\sqrt{T\mu}\)</td><td>a húr hullámimpedanciája</td></tr>
+<tr><td>\(f_0,\;N,\;f_s\)</td><td>alapfrekvencia, hurokhossz mintában, mintavételi frekvencia</td></tr>
+<tr><td>\(\beta\)</td><td>a vonó távolsága a hídtól a húrhossz törtrészében</td></tr>
+<tr><td>\(v_b,\;v_s\)</td><td>vonósebesség, a húr sebessége a vonó helyén</td></tr>
+<tr><td>\(a,\;b\)</td><td>a vonóhoz érkező két sebességhullám</td></tr>
+<tr><td>\(v_\Delta^-\),\(\;v_\Delta\)</td><td>relatív sebesség a vonóerő nélkül, illetve vele</td></tr>
+<tr><td>\(\rho,\;\Delta,\;P,\;k\)</td><td>súrlódási tábla értéke, hozzáadott hullám, vonónyomás, a tábla meredeksége</td></tr>
+<tr><td>\(S,\;g\)</td><td>a hídszűrő simítása és hurokerősítése</td></tr>
+<tr><td><b>haladó hullám</b></td><td>a húron végigfutó púp; a húr alakja két ellentétes irányú haladó hullám összege</td></tr>
+<tr><td><b>hullámvezető</b></td><td>két késleltetővonal (sín) a húr két irányú hullámainak; a végeken előjelváltás</td></tr>
+<tr><td><b>csomópont</b></td><td>a pont, ahol a vonó erőt ad a húrnak: két bejövő hullám, két kimenő hullám</td></tr>
+<tr><td><b>stick–slip</b></td><td>tapadás–csúszás: a vonós húr alapvető mozgásmódja</td></tr>
+<tr><td><b>Helmholtz-mozgás</b></td><td>a húr alakja két egyenes, köztük egy körbefutó törés</td></tr>
+<tr><td><b>sul ponticello</b></td><td>vonás a hídhoz közel (kis \(\beta\)): éles, fémes hang</td></tr></table></div></div>
+</section>
+</div>
+
+<script>
+const FS=44100,$=id=>document.getElementById(id),AV=[];
+
+/* === A modell: ez a függvény jelenik meg a „Forráskód” fülön is === */
+function bow(p){
+  const f=p.f, vb=p.v/100, P=p.P/100, be=p.b/100, S=p.S/100;
+  const k=5-4*P, gD=0.995;                 // tábla meredeksége, hurokerősítés
+  const D=FS/f-S;                          // a hurok késleltetése a szűrő nélkül
+  const Nb=Math.max(2,Math.round(be*D)), Nn=Math.max(2,Math.round(D)-Nb);
+  const L=Math.floor(FS*2.4), t1=1.7*FS;   // hossz, a vonó felemelése
+  const bd=new Float32Array(Nb), nd=new Float32Array(Nn);       // híd- és nyakoldali vonal
+  const y=new Float32Array(L), vs=new Float32Array(L), rr=new Float32Array(L);
+  let ib=0, inn=0, xp=0;
+  for(let n=0;n<L;n++){
+    const e=Math.min(1,n/(0.05*FS),n>t1?Math.max(0,1-(n-t1)/(0.1*FS)):1); // vonóburkoló
+    const bo=bd[ib], xo=(1-S)*bo+S*xp; xp=bo;     // hídszűrő bemenete és kimenete
+    const br=-gD*xo, nr=-nd[inn];                 // visszaverődések
+    const s=br+nr, vd=vb*e-s;                     // húrsebesség, relatív sebesség
+    const rho=Math.min(1,Math.pow(Math.abs(k*vd)+0.75,-4));   // súrlódási tábla
+    const nv=vd*rho*e;                            // a vonó által hozzáadott hullám
+    nd[inn]=br+nv; bd[ib]=nr+nv;                  // az új hullámok a vonalakba
+    if(++ib>=Nb)ib=0; if(++inn>=Nn)inn=0;
+    y[n]=bo; vs[n]=s+nv; rr[n]=rho;               // kimenet, húrsebesség, tábla
+  }
+  let pk=1e-9; for(const v of y)pk=Math.max(pk,Math.abs(v));
+  for(let i=0;i<L;i++)y[i]*=0.7/pk;
+  return {y,vs,rr,Nb,Nn};
+}
+$('srccode').textContent=bow.toString();
+
+/* === lap és hang === */
+const tabs=document.querySelectorAll('#tabs button');
+tabs.forEach(b=>b.onclick=()=>{tabs.forEach(x=>x.classList.remove('active'));b.classList.add('active');
+ document.querySelectorAll('section').forEach(s=>s.classList.remove('active'));$('p-'+b.dataset.id).classList.add('active');
+ if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise();setTimeout(()=>AV.forEach(f=>f()),30)});
+addEventListener('resize',()=>AV.forEach(f=>f()));
+let ac=null;
+function play(y){try{ac=ac||new (window.AudioContext||window.webkitAudioContext)();if(ac.state==='suspended')ac.resume();
+ const b=ac.createBuffer(1,y.length,FS);b.copyToChannel(y,0);const s=ac.createBufferSource();s.buffer=b;s.connect(ac.destination);s.start()}catch(e){console.error(e)}}
+function cv(c){const d=devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;c.width=W*d;c.height=H*d;const g=c.getContext('2d');g.setTransform(d,0,0,d,0,0);g.fillStyle='#fff';g.fillRect(0,0,W,H);return[g,W,H]}
+const ln=(g,P,c,w,dash)=>{g.strokeStyle=c;g.lineWidth=w||1.5;g.setLineDash(dash||[]);g.beginPath();P.forEach((q,i)=>i?g.lineTo(q[0],q[1]):g.moveTo(q[0],q[1]));g.stroke();g.setLineDash([])};
+const nf=(x,d)=>(+x).toFixed(d).replace('.',',');
+function panel(id,title,specs,drawf,snd){
+ const r=$(id);
+ r.innerHTML='<p class="pt">'+title+'</p>'+specs.map(s=>'<div class="ctl"><label>'+s[1]+'</label><input type="range" data-k="'+s[0]+'" min="'+s[2]+'" max="'+s[3]+'" step="'+s[4]+'" value="'+s[5]+'"><output></output></div>').join('')+'<canvas></canvas><div class="box"></div>'+(snd?'<button class="btn">🔊 Hang</button>':'');
+ const ins=[...r.querySelectorAll('input')],outs=[...r.querySelectorAll('output')],c=r.querySelector('canvas'),bx=r.querySelector('.box');
+ const rd=()=>{const p={};ins.forEach((e,i)=>{p[e.dataset.k]=+e.value;outs[i].textContent=e.value});return p};
+ const go=()=>{if(!c.clientWidth)return;const q=cv(c);bx.textContent=drawf(q[0],q[1],q[2],rd())||''};
+ ins.forEach(e=>e.addEventListener('input',go));AV.push(go);go();
+ if(snd)r.querySelector('button').onclick=()=>play(snd(rd()));
+}
+
+/* 1. Helmholtz */
+panel('pn1','Szimuláció: a húr sebessége a vonó helyén egy periódus alatt',[['b','Vonó helye β (%)',4,50,1,12]],(g,W,H,p)=>{
+ const b=p.b/100,sl=-(1-b)/b,m=Math.max(1,-sl),X=u=>30+u*(W-50),Y=v=>H/2-v/m*(H/2-22),Yf=v=>H/2-v*(H/2-22)*0.6;
+ ln(g,[[30,H/2],[W-20,H/2]],'#ccc',1);
+ ln(g,[[X(0),Y(1)],[X(1-b),Y(1)],[X(1-b),Y(sl)],[X(1),Y(sl)],[X(1),Y(1)]],'#ff2e8a',2.5);
+ ln(g,[[X(0),Yf(.8)],[X(1),Yf(-.8)],[X(1),Yf(.8)]],'#2f6f8f',2);
+ return 'rózsaszín: v_s a vonónál (+v_b '+Math.round((1-b)*100)+'%-ig, '+nf(sl,2)+'·v_b '+Math.round(b*100)+'%-ig) · kék: híderő (fűrészfog, skála szabad)'});
+
+/* 0. d’Alembert */
+panel('pn0','Szimuláció: két haladó hullám a húron (d’Alembert)',[['c','Idő (a periódus %-a)',0,100,1,10],['b','Pengetés helye β (%)',5,50,1,20]],(g,W,H,p)=>{
+ const be=p.b/100,ct=p.c/50,X=x=>30+x*(W-60),Y=v=>H/2-v*(H/2-24);
+ const tri=x=>x<be?x/be:(1-x)/(1-be),s=u=>{const m=((u%2)+2)%2;return m<=1?tri(m):-tri(2-m)};
+ const R=[],Lf=[],S=[];
+ for(let i=0;i<=200;i++){const x=i/200;R.push([X(x),Y(.5*s(x-ct))]);Lf.push([X(x),Y(.5*s(x+ct))]);S.push([X(x),Y(.5*s(x-ct)+.5*s(x+ct))])}
+ ln(g,[[30,H/2],[W-30,H/2]],'#ddd',1);ln(g,R,'#ff2e8a',1.4);ln(g,Lf,'#2f6f8f',1.4);ln(g,S,'#1c1a17',3);
+ return 'rózsaszín: jobbra haladó · kék: balra haladó · fekete: a húr alakja (az összeg) · t = '+nf(p.c/100,2)+' periódus'});
+/* 2. súrlódási tábla */
+panel('pn2','Szimuláció: a súrlódási tábla (a vonó által hozzáadott hullám)',[['P','Vonónyomás P (%)',0,100,1,50]],(g,W,H,p)=>{
+ const k=5-4*p.P/100,rho=x=>Math.min(1,Math.pow(Math.abs(k*x)+.75,-4)),X=x=>W/2+x*(W/2-30),A=[],R=[];let m=0;
+ for(let i=0;i<=300;i++){const x=-1+i/150;m=Math.max(m,Math.abs(x*rho(x)))}
+ const Y=v=>H/2-v*(H/2-22);
+ for(let i=0;i<=300;i++){const x=-1+i/150;A.push([X(x),Y(x*rho(x)/m)]);R.push([X(x),Y(rho(x))])}
+ ln(g,[[30,H/2],[W-20,H/2]],'#ccc',1);ln(g,[[X(0),10],[X(0),H-10]],'#ccc',1);
+ const xs=.25/k;ln(g,[[X(xs),10],[X(xs),H-10]],'#999',1,[4,4]);ln(g,[[X(-xs),10],[X(-xs),H-10]],'#999',1,[4,4]);
+ ln(g,R,'#2f6f8f',1.8,[6,4]);ln(g,A,'#ff2e8a',2.5);
+ return 'rózsaszín: Δ = ρ·v_Δ⁻ (normált) · kék szaggatott: ρ · k = '+nf(k,2)+' · a ragadás tartománya: |v_Δ⁻| < '+nf(xs,3)});
+
+/* 3. fő demó */
+panel('pn3','Szimuláció: vonós húr – ragadás és csúszás a valós modellből',[
+ ['f','Alapfrekvencia f₀ (Hz)',82,660,1,196],['v','Vonósebesség v_b (×0,01)',5,60,1,20],['P','Vonónyomás P (%)',0,100,1,50],['b','Vonó helye β (%)',4,30,1,10],['S','Hídszűrő S (×0,01)',0,50,1,50]],
+(g,W,H,p)=>{
+ const r=bow(p),per=FS/p.f,len=Math.floor(3.5*per),a=Math.floor(1.5*FS),X=i=>10+i/len*(W-20),top=H*0.62,vm=Math.max(1,...r.vs.slice(a,a+len).map(Math.abs));
+ for(let i=0;i<len;i++)if(r.rr[a+i]>0.999){g.fillStyle='rgba(47,111,143,.18)';g.fillRect(X(i),0,Math.max(1,X(1)-X(0)),top)}
+ const Y=v=>top/2-v/vm*(top/2-8),V=[],O=[];
+ for(let i=0;i<len;i++){V.push([X(i),Y(r.vs[a+i])]);O.push([X(i),top+(H-top)/2-r.y[a+i]*(H-top)/2*0.9])}
+ ln(g,[[10,Y(0)],[W-10,Y(0)]],'#ccc',1);ln(g,[[10,Y(p.v/100)],[W-10,Y(p.v/100)]],'#ff2e8a',1.2,[5,4]);ln(g,V,'#1c1a17',2);
+ ln(g,[[10,top],[W-10,top]],'#999',1);ln(g,O,'#ff2e8a',1.6);
+ let st=0;for(let i=0;i<len;i++)if(r.rr[a+i]>0.999)st++;
+ return 'felül: v_s (fekete), v_b (rózsaszín szaggatott), kék = ragadás · alul: kimenet · N_b='+r.Nb+', N_n='+r.Nn+' · max|v_s| = '+nf(vm,2)+' · ragadás: '+Math.round(st/len*100)+'%'},
+p=>bow(p).y);
+</script>
+</body>
+</html>
